@@ -1,0 +1,63 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>SN</th>
+                                    <th>Full Name</th>
+                                    <th>Matric_No</th>
+                                    <th>Gender</th>
+                                    <th>Department</th>
+                                    <th>Level</th>
+                                    <th>Fees</th>
+                                    <th>Email</th>
+                                    <th>Course</th>
+                                    <th>Avatar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ student.last_name}}, {{student.first_name}}</td>
+                                    <td>{{student.matric_no}}</td>
+                                    <td>{{ student.gender}}</td>
+                                    <td>{{ student.student.dept.name}}</td>
+                                    <td>{{ student.level}}</td>
+                                    <td>{{ student.fees}}</td>
+                                    <td>{{ student.email}}</td>
+                                    <td>{{ student.student.course.name}}</td>
+                                    
+                                    <td>
+                                        {% if student.profile_pic == ""  %}
+                                        No Image
+                                        {% else %}
+                                        <img class="img img-fluid mb-2" height="100" width="100"
+                                            src="{{student.profile_pic}}" alt="">
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

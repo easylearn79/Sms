@@ -27,7 +27,7 @@ SECRET_KEY = '+*08!l0tk#0b&ho=ybwtzx4g=(zw1f_)@l%+6(_p_ceig3@icz'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'still-sea-06083.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['*', 'oduduwauniversitysms.herokuapp.com','127.0.0.1']
 
 AUTH_USER_MODEL = 'sms.CustomUser'
 

@@ -15,11 +15,16 @@ Including another URLconf
 """
 from django.urls import path
 from .staff_views import InvoiceCreateView, InvoiceListView, InvoiceDeleteView, InvoiceDetailView,InvoiceUpdateView,ReceiptCreateView, ReceiptUpdateView
+from .hod_views import StudentDetailView,StudentDeleteView
+from sms.EditResultView import EditResultView
+from .student_views import InvoiceDetailVie, ReceiptDetailView,student_list
 
 
 from . import hod_views, staff_views, student_views, views
 
 urlpatterns = [
+    path('delete/<int:pk>/', StudentDeleteView.as_view(), name='student-delete'),
+    path('<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
     path("", views.login_page, name='login_page'),
     path("get_attendance", views.get_attendance, name='get_attendance'),
     path("firebase-messaging-sw.js", views.showFirebaseJS, name='showFirebaseJS'),
@@ -29,20 +34,29 @@ urlpatterns = [
     path("staff/add", hod_views.add_staff, name='add_staff'),
     path("course/add", hod_views.add_course, name='add_course'),
     path("dept/add", hod_views.add_dept, name='add_dept'),
+    path("level/add", hod_views.add_level, name='add_level'),
     path("add_session/", hod_views.add_session, name='add_session'),
     path("check_email_availability", hod_views.check_email_availability,name="check_email_availability"),
     path("session/manage/", hod_views.manage_session, name='manage_session'),
     path("session/edit/<int:session_id>",hod_views.edit_session, name='edit_session'),
+    
+    path("term/manage/", hod_views.manage_term, name='manage_term'),
+    path("term/edit/<int:term_id>",hod_views.edit_term, name='edit_term'),
+    path("add_term/", hod_views.add_term, name='add_term'),
+    
+    
     path("student/add/", hod_views.add_student, name='add_student'),
     path("subject/add/", hod_views.add_subject, name='add_subject'),
     path("staff/manage/", hod_views.manage_staff, name='manage_staff'),
     path("student/manage/", hod_views.manage_student, name='manage_student'),
     path("course/manage/", hod_views.manage_course, name='manage_course'),
     path("dept/manage/", hod_views.manage_dept, name='manage_dept'),
+    path("level/manage/", hod_views.manage_level, name='manage_level'),
     path("subject/manage/", hod_views.manage_subject, name='manage_subject'),
     path("staff/edit/<int:staff_id>", hod_views.edit_staff, name='edit_staff'),
     path("student/edit/<int:student_id>",hod_views.edit_student, name='edit_student'),
     path("course/edit/<int:course_id>",hod_views.edit_course, name='edit_course'),
+    path("dept/edit/<int:dept_id>",hod_views.edit_dept, name='edit_dept'),
     path("subject/edit/<int:subject_id>",hod_views.edit_subject, name='edit_subject'),
     
     
@@ -57,6 +71,9 @@ urlpatterns = [
     path("staff/view/profile/", staff_views.staff_view_profile,name='staff_view_profile'),
     path("staff/attendance/save/", staff_views.save_attendance, name='save_attendance'),
     path("staff/attendance/update/", staff_views.update_attendance,name='update_attendance'),
+    path("staff/result/edit/", EditResultView.as_view(),name='edit_student_result'),
+    path('staff/result/fetch/', staff_views.fetch_student_result,name='fetch_student_result'),
+
     path('list/', InvoiceListView.as_view(), name='invoice-list'),
     path('create/', InvoiceCreateView.as_view(), name='invoice-create'),
     path('<int:pk>/detail/', InvoiceDetailView.as_view(), name='invoice-detail'),
@@ -79,11 +96,24 @@ urlpatterns = [
         staff_views.TermUpdateView.as_view(), name='term-update'),
     path('term/<int:pk>/delete/',
         staff_views.TermDeleteView.as_view(), name='term-delete'),
+    path("staff/result/add/", staff_views.staff_add_result, name='staff_add_result'),
+    path("staff/result/edit/", EditResultView.as_view(),name='edit_student_result'),
 
     # Student
+    path('list', student_list, name='student-list'),
     path("student/view/profile/", student_views.student_view_profile,name='student_view_profile'),
     path("student/fcmtoken/", student_views.student_fcmtoken,name='student_fcmtoken'),
     path("student/home/", student_views.student_home, name='student_home'),
     path("student/view/attendance/", student_views.student_view_attendance,name='student_view_attendance'),
+    path('student/view/result/', student_views.student_view_result,name='student_view_result'),
+    path('student/view/receipt/', student_views.student_view_receipt,name='student_view_receipt'),
+    path('student/view/invoice/', student_views.student_view_invoice,name='student_view_invoice'),
+    path('<int:pk>/details/', InvoiceDetailVie.as_view(), name='invoice-details'),
+
+
+
+
 
 ]
+
+

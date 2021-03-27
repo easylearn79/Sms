@@ -9,7 +9,7 @@
     </a>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" style="color: chartreuse;">
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
@@ -34,7 +34,7 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!---<li class="nav-item">
                     {% url 'admin_view_profile' as admin_view_profile %}
                     <a href="{{admin_view_profile}}" class="nav-link {% if admin_view_profile == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -43,8 +43,7 @@
 
                         </p>
                     </a>
-                </li>
-                <li class="nav-header">Finance</li>
+                </li> --->
                 <li class="nav-item">
                   <a href="{% url 'invoice-list' %}" class="nav-link">
                     <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -161,6 +160,27 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    {% url 'add_level' as add_level %}
+                    <a href="{{add_level}}" class="nav-link  {% if add_level == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Add Level
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    {% url 'manage_level' as manage_level %}
+                    <a href="{{manage_level}}"
+                        class="nav-link  {% if manage_level == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Manage Level
+
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     {% url 'add_subject' as add_subject %}
                     <a href="{{add_subject}}" class="nav-link  {% if add_subject == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -203,9 +223,27 @@
 
                     </p>
                 </a>
-        </li>
-
-                
+                </li>
+                <li class="nav-item">
+                    {% url 'add_term' as add_term %}
+                    <a href="{{add_term}}" class="nav-link  {% if add_term == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Add Term
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                {% url 'manage_term' as manage_term %}
+                {% url 'edit_term' term_id as edit_term%}
+                <a href="{{manage_term}}"
+                    class="nav-link  {% if edit_term == request.path or manage_term == request.path %} active {% endif %}">
+                    <i class="nav-icon fas fa-th"></i>
+                    <p>
+                        Manage Term
+                    </p>
+                </a>
+                </li>
 {% elif request.user.user_type == '2' %}
     <!-- Brand Logo -->
     <a href="#" class="brand-link">
@@ -281,23 +319,6 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'sessions' %}" class="nav-link">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                        Sessions
-                    </p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'terms' %}" class="nav-link">
-                    <i class="nav-icon fas fa-bars"></i>
-                    <p>
-                        Terms
-                        <i class="right"></i>
-                    </p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     {% url 'staff_feedback' as staff_feedback %}
                     <a href="{{staff_feedback}}" class="nav-link {% if staff_feedback == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -354,40 +375,37 @@
                         </p>
                     </a>
                 </li>
-          
                 <li class="nav-item">
-                    {% url 'student_view_attendance' as student_view_attendance %}
-                    <a href="{{student_view_attendance}}" class="nav-link {% if student_view_attendance == request.path %} active {% endif %}">
-                        <i class="nav-icon fas fa-th"></i>
-                        <p>View Attendance</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    {% url 'student_view_notification' as student_view_notification %}
-                    <a href="{{student_view_notification}}" class="nav-link {% if student_view_notification == request.path %} active {% endif %}">
+                    {% url 'student_view_result' as student_view_result %}
+                    <a href="{{student_view_result}}" class="nav-link {% if student_view_result == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                           View Notifications
-
+                           View Result
                         </p>
                     </a>
                 </li>
-
-                <li class="nav-item">
-                    {% url 'student_apply_leave' as student_apply_leave %}
-                    <a href="{{student_apply_leave}}" class="nav-link {% if student_apply_leave == request.path %} active {% endif %}">
+                <!-----<li class="nav-item">
+                    {% url 'student_view_receipt' as student_view_receipt %}
+                    <a href="{{student_view_receipt}}" class="nav-link {% if student_view_receipt == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                           Apply For Leave
-
+                           View Receipt
+                        </p>
+                    </a>
+                </li> ----->
+                <li class="nav-item">
+                    {% url 'student_view_invoice' as student_view_invoice %}
+                    <a href="{{student_view_invoice}}" class="nav-link {% if student_view_invoice == request.path %} active {% endif %}">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                           View Receipt
                         </p>
                     </a>
                 </li>
 
                 <li class="nav-item">
                     {% url 'student_feedback' as student_feedback %}
-                    <a href="{{student_feedback}}" class="nav-link {% if student_feedback == request.path %} active {% endif %}">
+                    <a href="#{{student_feedback}}" class="nav-link {% if student_feedback == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                            Feedback

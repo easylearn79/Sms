@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '+*08!l0tk#0b&ho=ybwtzx4g=(zw1f_)@l%+6(_p_ceig3@icz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', 'still-sea-06083.herokuapp.com','127.0.0.1']
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.redirects',
     'django.contrib.humanize',
 
 ]
@@ -131,6 +132,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -157,6 +159,13 @@ MEDIA_URL = '/media/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
+
+
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+
 
 
 AUTHENTICATION_BACKENDS = ['sms.EmailBackend.EmailBackend']

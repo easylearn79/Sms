@@ -18,8 +18,7 @@
                             <thead>
                                 <tr>
                                     <th>SN</th>
-                                    <th>Start</th>
-                                    <th>End</th>
+                                    <th>Start/End</th>
                                     <th>Edit</th>
                                 </tr>
                             </thead>
@@ -27,8 +26,8 @@
                                 {% for session in sessions %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{session.start_year}}</td>
-                                    <td>{{session.end_year}}</td>
+                                    <td>{{session.name}}</td>
+                                    
                                     <td><a href="{% url 'edit_session' session.id %}" class="btn btn-primary">Edit</a></td>
                                 </tr>
                                 {% endfor %}

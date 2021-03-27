@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 import json
 import requests
 from django.contrib import messages
@@ -10,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from .EmailBackend import EmailBackend
-from .models import Session, Subject
+from .models import AcademicSession, Subject
 
 # Create your views here.
 
@@ -54,7 +51,7 @@ def get_attendance(request):
     session_id = request.POST.get('session')
     try:
         subject = get_object_or_404(Subject, id=subject_id)
-        session = get_object_or_404(Session, id=session_id)
+        session = get_object_or_404(AcademicSession, id=session_id)
     
     except Exception as e:
         return None

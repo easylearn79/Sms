@@ -1,7 +1,19 @@
 from django import forms
 from django.forms.widgets import DateInput, TextInput
+from django.forms import inlineformset_factory, modelformset_factory
 
 from .models import *
+
+
+
+InvoiceItemFormset = inlineformset_factory(
+    Invoice, InvoiceItem, fields=['description', 'amount'], extra=1, can_delete=True)
+
+InvoiceReceiptFormSet = inlineformset_factory(
+    Invoice, Receipt, fields=('amount_paid', 'date_paid', 'comment'), extra=0, can_delete=True
+)
+
+Invoices = modelformset_factory(Invoice, exclude=(), extra=4)
 
 
 class FormSettings(forms.ModelForm):
@@ -14,8 +26,6 @@ class FormSettings(forms.ModelForm):
 
 class CustomUserForm(FormSettings):
     matric_no = forms.CharField(required=True)
-    fees = forms.CharField(required=True)
-    level = forms.CharField(required=True)
     email = forms.EmailField(required=True)
     gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
     first_name = forms.CharField(required=True)
@@ -65,7 +75,7 @@ class StudentForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'session', 'dept']
+            ['course', 'session', 'dept','level','term']
 
 
 class AdminForm(CustomUserForm):
@@ -81,10 +91,9 @@ class StaffForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(StaffForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
+    class Meta:
         model = Staff
-        fields = CustomUserForm.Meta.fields + \
-            ['course' ]
+        fields =['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
 
 
 class CourseForm(FormSettings):
@@ -92,7 +101,7 @@ class CourseForm(FormSettings):
         super(CourseForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        fields = ['name']
+        fields = ['name', 'level_info','dept_info']
         model = Course
 
 class DepartmentForm(FormSettings):
@@ -102,6 +111,14 @@ class DepartmentForm(FormSettings):
     class Meta:
         fields = ['name']
         model = Department
+
+class LevelForm(FormSettings):
+    def __init__(self, *args, **kwargs):
+        super(LevelForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        fields = ['name']
+        model = Level
 
 class SubjectForm(FormSettings):
 
@@ -113,18 +130,23 @@ class SubjectForm(FormSettings):
         fields = ['name', 'staff', 'course']
 
 
-class SessionForm(FormSettings):
+class AcademicSessionForm(FormSettings):
     def __init__(self, *args, **kwargs):
-        super(SessionForm, self).__init__(*args, **kwargs)
+        super(AcademicSessionForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        model = Session
+        model = AcademicSession
         fields = '__all__'
-        widgets = {
-            'start_year': DateInput(attrs={'type': 'date'}),
-            'end_year': DateInput(attrs={'type': 'date'}),
-        }
+     
+     
+class AcademicTermForm(FormSettings):
+    def __init__(self, *args, **kwargs):
+        super(AcademicTermForm, self).__init__(*args, **kwargs)
 
+    class Meta:
+        model = AcademicTerm
+        fields = '__all__'
+     
 
 class LeaveReportStaffForm(FormSettings):
     def __init__(self, *args, **kwargs):
@@ -174,10 +196,10 @@ class StudentEditForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
         super(StudentEditForm, self).__init__(*args, **kwargs)
 
-    class Meta(CustomUserForm.Meta):
+    class Meta:
         model = Student
-        fields = CustomUserForm.Meta.fields 
-
+        fields = CustomUserForm.Meta.fields + \
+        ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
 
 class StaffEditForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
@@ -189,7 +211,7 @@ class StaffEditForm(CustomUserForm):
 
 
 class EditResultForm(FormSettings):
-    session_list = Session.objects.all()
+    session_list = AcademicSession.objects.all()
     session_year = forms.ModelChoiceField(
         label="Session Year", queryset=session_list, required=True)
 

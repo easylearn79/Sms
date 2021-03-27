@@ -17,16 +17,21 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th>SN</th>
-                                    <th>Dept Name</th>
+                                    <th> SN </th>
+                                    <th> Dept Name </th>
+                                    <th> Fees </th>
+                                    <th> Edit </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for dept in depts %}
-                                <tr>
+                                <tr class='clickable-row' data-href="{% url 'edit_dept' dept.id %}">
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{dept.name}}</td>
+                                    <td>{{dept.fees}}</td>
+                                    <td><a href="{% url 'edit_dept' dept.id %}" class="btn btn-primary">Edit</a></td>
                                 </tr>
+                                
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -37,3 +42,11 @@
     </div>
 </section>
 {% endblock content %}
+{% block morejs %}
+<script>
+   $('#depttable').DataTable({
+    select: false
+    });
+</script>
+
+{% endblock morejs %}

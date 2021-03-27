@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student,Staff,Session,Subject
+from .models import Student,Staff,AcademicSession,Subject
 from django.contrib.auth.admin import UserAdmin
 
 from .models import CustomUser

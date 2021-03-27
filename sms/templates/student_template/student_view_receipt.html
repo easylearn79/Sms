@@ -1,0 +1,53 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content-header %}
+{% endblock content-header %}
+
+
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+       
+                <!-- /.card -->
+<div class="card card-primary">
+    <div class="card-header"><h3 class="card-title">{{page_title}}</h3>
+        
+    </div>
+   <div class="table p-2">
+
+       <table class="table table-bordered">
+           <tr>
+               <th>ID</th>
+               <th>invoice</th>
+               <th>amount_paid</th>
+               <th>comment</th>
+               <th>Date Paid</th>
+               <th>QRCODE</th>
+               
+            </tr>
+        {% for receipt in receipts %}
+        <tr class='clickable-row' data-href="{% url 'receipt-detail' receipt.id %}">
+            <td>{{forloop.counter}}</td>
+            <td>{{ receipt.invoice }}</td>
+            <td>{{ receipt.amount_paid }}</td>
+            <td>{{ receipt.comment }}</td>
+            <td>{{receipt.date_paid}}</td>
+           <td> <img src={{receipt.qr_code.url}}></td>
+
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
+    </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

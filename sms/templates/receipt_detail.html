@@ -1,0 +1,31 @@
+{% extends 'main_app/base.html' %}
+{% load humanize %}
+
+
+{% block content %}
+<h5>Payment History</h5>
+<table class="table table-bordered table-sm">
+  <thead class="thead-light">
+    <tr>
+      <th>S/N</th>
+      <th>Amount Paid</th>
+      <th>Date Paid</th>
+      <th>Comment Paid</th>
+      <th>QRCODE</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for receipt in receipts %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ receipt.amount_paid}}</td>
+      <td>{{ receipt.date_paid}}</td>
+      <td>{{ receipt.comment}}</td>
+      <td> <img src={{receipt.qr_code.url}}></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+{% endblock content %}

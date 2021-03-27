@@ -20,24 +20,6 @@ Academic Sessions
     <div class="col-sm-12">
 
         <table class="table table-bordered">
-          <tbody>
-            {% for object in object_list %}
-            <tr>
-              <td>{{ object }}</td>
-              <td>
-                {% if object.current == True %}
-                  Current <i class="fa fa-check"></i>
-                {% endif %}
-              </td>
-              <td><a href="{% url 'session-update' object.id %}"><i
-                    class="fa fa-edit"></i></a> <a
-                  href="{% url 'session-delete' object.id %}"><i
-                    class="fa fa-trash-alt"></i></a></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-
     </div>
   </div>
 

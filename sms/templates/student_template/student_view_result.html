@@ -19,6 +19,8 @@
        <table class="table table-bordered">
            <tr>
                <th>ID</th>
+               <th>Department</th>
+               <th>Level</th>
                <th>Subject</th>
                <th>Test</th>
                <th>Exam</th>
@@ -27,6 +29,8 @@
         {% for result in results %}
         <tr>
             <td>{{forloop.counter}}</td>
+            <td>{{ result.dept_info }}</td>
+            <td>{{ result.level_info }}</td>
             <td>{{ result.subject }}</td>
             <td>{{ result.test }}</td>
             <td>{{ result.exam }}</td>

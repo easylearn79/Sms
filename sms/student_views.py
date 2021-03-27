@@ -17,11 +17,13 @@ from .models import *
 
 
 def student_home(request):
+    receipts = Receipt.objects.filter()
+    invoice = Invoice.objects.filter()
     student = get_object_or_404(Student, admin=request.user)
     total_subject = Subject.objects.filter(course=student.course).count()
-    invoice = Invoice.objects.filter(student=student)
     subjects = Subject.objects.filter(course=student.course)
     context = {
+        'receipts':receipts,
         'invoice':invoice,
         'total_subject': total_subject,
         'subjects': subjects,
@@ -29,20 +31,6 @@ def student_home(request):
 
     }
     return render(request, 'student_template/home_content.html', context)
-
-
-
-def student_view_finance(request):
-    student = get_object_or_404(Student, admin=request.user)
-    invoice = get_object_or_404(Invoice, invoice_id=invoice_id, user=request.user)
-
-    
-    context = {
-        'invoice':invoice,
-        'student':student,
-        
-    }
-    
 
 
 @ csrf_exempt
@@ -79,34 +67,37 @@ def student_view_attendance(request):
             return None
 
 
-class InvoiceDetailView(DetailView):
-    model = Invoice
-    fields = '__all__'
 
-    def get_context_data(self, **kwargs):
-        context = super(InvoiceDetailView, self).get_context_data(**kwargs)
-        context['receipts'] = Receipt.objects.filter(invoice=self.object)
-        context['items'] = InvoiceItem.objects.filter(invoice=self.object)
-        return context
-
-
+def student_view_result(request):
+    student = get_object_or_404(Student, admin=request.user)
+    results = StudentResult.objects.filter(student=student)
+    context = {
+        'results': results,
+        'page_title': "View Result"
+    }
+    return render(request, "student_template/student_view_result.html", context)
 
 
 
+def student_view_receipt(request):
+    student = get_object_or_404(Student, admin=request.user)
+    receipts = Receipt.objects.filter(student=student)
+    context = {
+        'receipts': receipts,
+        'page_title': "View Receipt"
+    }
+    return render(request, "student_template/student_view_receipt.html", context)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+def student_view_invoice(request):
+    student = get_object_or_404(Student, admin=request.user)
+    invoices = Invoice.objects.filter(student=student)
+    context = {
+        'invoices': invoices,
+        'page_title': "invoice"
+    }
+    return render(request,"student_template/student_view_invoice.html", context)
 
 
 def student_view_profile(request):
@@ -159,3 +150,47 @@ def student_fcmtoken(request):
         return HttpResponse("True")
     except Exception as e:
         return HttpResponse("False")
+    
+    
+    
+    
+class InvoiceDetailVie(DetailView):
+    model = Invoice
+    fields = '__all__'
+    template_name = 'invoice_details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceDetailVie, self).get_context_data(**kwargs)
+        context['receipts'] = Receipt.objects.filter(invoice=self.object)
+        context['items'] = InvoiceItem.objects.filter(invoice=self.object)
+        return context
+    
+    
+class ReceiptDetailView(DetailView):
+    model = Receipt
+    fields = '__all__'
+    template_name = 'invoice_details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(InvoiceDetailVie, self).get_context_data(**kwargs)
+        context['receipts'] = Receipt.objects.filter(invoice=self.object)
+        context['page_title'] = 'student'
+        return context
+    
+    
+    
+    
+def student_list(request):
+    students = Student.objects.all()
+    return render(request, 'student_template/student_list.html', {"students":students})
+
+
+
+
+
+
+
+
+
+
+

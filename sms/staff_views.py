@@ -54,7 +54,7 @@ def staff_home(request):
 def staff_confirm_payment(request):
     staff = get_object_or_404(Staff, admin=request.user)
     invoice = Invoice.objects.filter()
-    sessions = Session.objects.all()
+    sessions = AcademicSession.objects.all()
     context = {
         'staff':staff,
         'invoice':invoice,
@@ -68,7 +68,7 @@ def staff_confirm_payment(request):
 def staff_take_attendance(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff_id=staff)
-    sessions = Session.objects.all()
+    sessions = AcademicSession.objects.all()
     context = {
         'subjects': subjects,
         'sessions': sessions,
@@ -84,7 +84,7 @@ def get_students(request):
     session_id = request.POST.get('session')
     try:
         subject = get_object_or_404(Subject, id=subject_id)
-        session = get_object_or_404(Session, id=session_id)
+        session = get_object_or_404(AcademicSession, id=session_id)
         students = Student.objects.filter(
             course_id=subject.course.id, session=session)
         student_data = []
@@ -107,7 +107,7 @@ def save_attendance(request):
     session_id = request.POST.get('session')
     students = json.loads(student_data)
     try:
-        session = get_object_or_404(Session, id=session_id)
+        session = get_object_or_404(AcademicSession, id=session_id)
         subject = get_object_or_404(Subject, id=subject_id)
         attendance = Attendance(session=session, subject=subject, date=date)
         attendance.save()
@@ -125,7 +125,7 @@ def save_attendance(request):
 def staff_update_attendance(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff_id=staff)
-    sessions = Session.objects.all()
+    sessions = AcademicSession.objects.all()
     context = {
         'subjects': subjects,
         'sessions': sessions,
@@ -284,7 +284,7 @@ def staff_view_notification(request):
 def staff_add_result(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff=staff)
-    sessions = Session.objects.all()
+    sessions = AcademicSession.objects.all()
     context = {
         'page_title': 'Result Upload',
         'subjects': subjects,
@@ -313,7 +313,6 @@ def staff_add_result(request):
             messages.warning(request, "Error Occured While Processing Form")
     return render(request, "staff_template/staff_add_result.html", context)
 
-
 @csrf_exempt
 def fetch_student_result(request):
     try:
@@ -335,7 +334,7 @@ def fetch_student_result(request):
 def staff_update_attendance(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff_id=staff)
-    sessions = Session.objects.all()
+    sessions = AcademicSession.objects.all()
     context = {
         'subjects': subjects,
         'sessions': sessions,
@@ -349,8 +348,8 @@ def staff_update_attendance(request):
 
 
 class InvoiceListView(ListView):
-  model = Invoice
-  template_name = 'invoice_list.html'
+    model = Invoice
+    template_name = 'invoice_list.html'
 
 
 class InvoiceCreateView(CreateView):
@@ -459,11 +458,6 @@ class ReceiptDeleteView(DeleteView):
     success_url = reverse_lazy('invoice-list')
 
 
-
-
-
-
-
 class SessionListView(SuccessMessageMixin, ListView):
     model = AcademicSession
     template_name = 'corecode/session_list.html'
@@ -476,16 +470,16 @@ class SessionListView(SuccessMessageMixin, ListView):
 
 
 class SessionCreateView(SuccessMessageMixin, CreateView):
-  model = AcademicSession
-  form_class = AcademicSessionForm
-  template_name = 'corecode/mgt_form.html'
-  success_url = reverse_lazy('sessions')
-  success_message = 'New session successfully added'
+    model = AcademicSession
+    form_class = AcademicSessionForm
+    template_name = 'corecode/mgt_form.html'
+    success_url = reverse_lazy('sessions')
+    success_message = 'New session successfully added'
 
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      context['title'] = 'Add new session'
-      return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Add new session'
+        return context
 
 
 
@@ -598,3 +592,8 @@ def current_session_view(request):
 
 
         return render(request, 'corecode/current_session.html', {"form":form})
+
+
+
+
+

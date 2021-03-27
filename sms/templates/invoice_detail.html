@@ -1,10 +1,11 @@
 {% extends 'main_app/base.html' %}
 {% load humanize %}
+{% block page_title %}{{object}}{% endblock page_title %}
 
 {% block content-header %}
 <div class="card-header">
   <div class="card-tools">
-    <a href="#" class="btn btn-tool">Print</a>
+    <a href="#" class="btn btn-tool" onclick="window.print()">Print</a>
     <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
     </a>
@@ -14,17 +15,20 @@
   </div>
 </div>
 {% endblock content-header %}
-
-
-
 {% block content %}
-
+<h1 style="text-align: center; color:#4CAF50">Oduduwa University Receipt</h1>
 <div class="row">
-  <div class="col-sm-4">
+  <div class="col-md-4">
+    <!-- Sidebar user panel (optional) -->
+    
+      <div class="card mb-3 box-shadow">
+          <img src="{{request.user.profile_pic}}" class="card-img-top" alt="User Image">
+      </div>
     <h3>{{ object }} </h3>
-    <h5>{{ object.session }} </h5>
-    <h5>{{ object.term }} </h5>
-    <h5>{{ object.class_for }} </h5>
+    <h5>Session : {{ object.session }} </h5>
+    <h5>Term: {{ object.term }} </h5>
+    <h5>Dept : {{ object.dept_info }} </h5>
+    <h5>Level : {{ object.level_info }} </h5>
     <h6>Status: {{ object.get_status_display }} </h6>
     <hr>
     <div>
@@ -97,7 +101,7 @@
       <td>{{ receipt.amount_paid}}</td>
       <td>{{ receipt.date_paid}}</td>
       <td>{{ receipt.comment}}</td>
-      <td><a href="{{ receipt.get_absolute_url}}">{{receipt.qr_code}}</td></a>
+      <td> <img src={{receipt.qr_code.url}}></td>
     </tr>
     {% endfor %}
   </tbody>

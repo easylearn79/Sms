@@ -1,0 +1,52 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+       
+                <!-- /.card -->
+<div class="card card-primary">
+    <div class="card-header"><h3 class="card-title">{{page_title}}</h3>
+    </div>
+   <div class="table p-2">
+
+       <table class="table table-bordered">
+           <tr>
+               <th>ID</th>
+               <th>Session</th>
+               <th>Term</th>
+               <th>Level</th>
+               <th>Balance_From_Previous_Term</th>
+            </tr>
+        {% for invoice in invoices %}
+        <tr class='clickable-row' data-href="{% url 'invoice-details' invoice.id %}">
+            <td>{{forloop.counter}}</td>
+            <td>{{ invoice.session }}</td>
+            <td>{{ invoice.term }}</td>
+            <td>{{invoice.level_info}}</td>
+            <td>{{ invoice.balance_from_previous_term }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
+    </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block morejs %}
+<script>
+   $('#invoicetable').DataTable({
+    select: false
+    });
+</script>
+
+{% endblock morejs %}

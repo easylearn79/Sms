@@ -101,7 +101,7 @@ class CourseForm(FormSettings):
         super(CourseForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        fields = ['name', 'level_info','dept_info']
+        fields = ['name']
         model = Course
 
 class DepartmentForm(FormSettings):

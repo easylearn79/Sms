@@ -29,6 +29,13 @@ from django.contrib.messages.views import SuccessMessageMixin
 
 from .forms import  AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
 
+
+
+def error_404_view(request,exception):
+    return render(request, 'hod_template/404.html')
+    
+
+
 def admin_home(request):
     total_staff = Staff.objects.all().count()
     students = CustomUser.objects.all()
@@ -1074,3 +1081,5 @@ class StudentDeleteView(DeleteView):
     
     
     
+
+

@@ -16,6 +16,12 @@ from .forms import *
 from .models import *
 
 
+def error_404_view(request,exception):
+    return render(request, 'student_template/404.html')
+    
+
+
+
 def student_home(request):
     receipts = Receipt.objects.filter()
     invoice = Invoice.objects.filter()

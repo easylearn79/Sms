@@ -12,6 +12,12 @@ from .models import AcademicSession, Subject
 # Create your views here.
 
 
+
+def error_404_view(request,exception):
+    return render(request, '404.html')
+    
+
+
 def login_page(request):
     if request.user.is_authenticated:
         if request.user.user_type == '1':

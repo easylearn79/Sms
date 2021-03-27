@@ -84,8 +84,6 @@ class Level(models.Model):
     
     
 class Course(models.Model):
-    dept_info   = models.ForeignKey(Department, on_delete=models.CASCADE)
-    level_info   = models.ForeignKey(Level, on_delete=models.CASCADE)
     name = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

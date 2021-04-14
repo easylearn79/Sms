@@ -19,3 +19,4 @@ dj_database_url
 qrcode
 django-grappelli==2.14.3
 cloudinary
+psycopg2==2.8.5

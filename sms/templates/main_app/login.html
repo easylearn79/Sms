@@ -22,15 +22,23 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
-<body class="hold-transition login-page">
+<body id="bg" style="background-image: url('{% static 'images/bg-01.jpg' %}');" class="hold-transition login-page">
+
+    <div class="col-lg-4">
+        
+    </div>
     <div class="login-box" >
         <div class="login-logo">
-            <a href="../../index2.html"><b>Oduduwa Panel</b></a>
+            <a href="../../index2.html" style="color: rgb(4, 6, 15);"><b><strong> Welcome To Oduduwa University</b></a>
 
         </div>
+            
         <!-- /.login-logo -->
         <div class="card">
             <div class="card-body login-card-body">
+                <div class="card"class="col-lg-8 col-md-5 col-sm-3"  style="width: 300px;" >
+                    <img src="{% static 'images/bg4.png' %}">
+                </div>
                 <p class="login-box-msg">Sign in to start your session</p>
                 {% if messages %}
                 <div class="col-12">
@@ -89,6 +97,10 @@
             <!-- /.login-card-body -->
         </div>
     </div>
+
+    <br>
+
+
     <!-- /.login-box -->
 
     <!-- jQuery -->

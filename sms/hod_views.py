@@ -1,50 +1,88 @@
 import json
 import requests
+import csv
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponse, HttpResponseRedirect,
+from django.http import JsonResponse
+from django.shortcuts import (HttpResponse,
                               get_object_or_404, redirect, render)
 from django.templatetags.static import static
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import UpdateView
-from .forms import InvoiceItemFormset, InvoiceReceiptFormSet, Invoices
 
 from .forms import *
-from .models import *
 from .form import *
 from .models import Invoice
 
-
-
-
-
-from .forms import InvoiceItemFormset, InvoiceReceiptFormSet, Invoices
-
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView, DetailView, DetailView
+from django.views.generic import ListView, DetailView
 from django.contrib.messages.views import SuccessMessageMixin
 
-from .forms import  AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
+from .forms import AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
 
 
+def manage_student(request):
+    students = CustomUser.objects.filter(user_type=3)
+    context = {
+        'students': students,
+        'page_title': 'Manage Students'
+    }
+    return render(request, "hod_template/manage_student.html", context)
 
-def error_404_view(request,exception):
+
+def error_404_view(request):
     return render(request, 'hod_template/404.html')
-    
+
+
+class StaffListView(ListView):
+    model = Staff
+    template_name = 'staff_template/home_content.html',
+
+
+class LecturerListView(ListView):
+    model = Lecturer
+    template_name = 'lecturer_template/home_content.html',
+
+
+class StudentDeleteView(DeleteView):
+    model = CustomUser
+    success_url = reverse_lazy('manage_student')
+    template_name = "corecode/student_confirm_delete.html"
+
+
+class LecturerDetailView(DetailView):
+    model = CustomUser
+    template_name = "lecturer_template/lecturer_details.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(LecturerDetailView, self).get_context_data(**kwargs)
+        return context
+
+
+class LecturerDeleteView(DeleteView):
+    model = CustomUser
+    success_url = reverse_lazy('manage_lecturer')
+    template_name = "lecturer_template/lecturer_confirm_delete.html"
+
+
+class StudentDetailView(DetailView):
+    model = CustomUser
+    template_name = "student_template/student_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentDetailView, self).get_context_data(**kwargs)
+        return context
 
 
 def admin_home(request):
     total_staff = Staff.objects.all().count()
+    total_lecturer = Lecturer.objects.all().count()
     students = CustomUser.objects.all()
     total_students = Student.objects.all().count()
     subjects = Subject.objects.all()
     total_subject = subjects.count()
     total_course = Course.objects.all().count()
-    total_dept   = Department.objects.all().count()
-    attendance_list = Attendance.objects.filter(subject__in=subjects)
+    total_dept = Department.objects.all().count()
     attendance_list = []
     subject_list = []
     for subject in subjects:
@@ -52,11 +90,12 @@ def admin_home(request):
         subject_list.append(subject.name[:7])
         attendance_list.append(attendance_count)
     context = {
-        'total_dept':total_dept,
+        'total_dept': total_dept,
         'page_title': "Administrative Dashboard",
         'total_students': total_students,
         'total_staff': total_staff,
-        'students':students,
+        'total_lecturer': total_lecturer,
+        'students': students,
         'total_course': total_course,
         'total_subject': total_subject,
         'subject_list': subject_list,
@@ -83,7 +122,9 @@ def add_staff(request):
             filename = fs.save(passport.name, passport)
             passport_url = fs.url(filename)
             try:
-                user = CustomUser.objects.create_user( email=email, password=password, user_type=2, first_name=first_name, last_name=last_name, profile_pic=passport_url)
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=2,
+                                                      first_name=first_name, last_name=last_name,
+                                                      profile_pic=passport_url)
                 user.gender = gender
                 user.address = address
                 user.staff.course = course
@@ -99,30 +140,66 @@ def add_staff(request):
     return render(request, 'hod_template/add_staff_template.html', context)
 
 
-def add_student(request):
-    student_form = StudentForm(request.POST or None, request.FILES or None)
-    context = {'form': student_form, 'page_title': 'Add Student'}
+def add_lecturer(request):
+    form = LecturerForm(request.POST or None, request.FILES or None)
+    context = {'form': form, 'page_title': 'Add Lecturer'}
     if request.method == 'POST':
-        if student_form.is_valid():
-            first_name = student_form.cleaned_data.get('first_name')
-            last_name = student_form.cleaned_data.get('last_name')
-            matric_no = student_form.cleaned_data.get('matric_no')
-            address = student_form.cleaned_data.get('address')
-            email = student_form.cleaned_data.get('email')
-            gender = student_form.cleaned_data.get('gender')
-            password = student_form.cleaned_data.get('password')
-            dept = student_form.cleaned_data.get('dept')
-            level = student_form.cleaned_data.get('level')
-            course = student_form.cleaned_data.get('course')
-            session = student_form.cleaned_data.get('session')
-            term = student_form.cleaned_data.get('term')
-            level   = student_form.cleaned_data.get('level')
+        if form.is_valid():
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            address = form.cleaned_data.get('address')
+            email = form.cleaned_data.get('email')
+            gender = form.cleaned_data.get('gender')
+            password = form.cleaned_data.get('password')
+            course = form.cleaned_data.get('course')
+            passport = request.FILES.get('profile_pic')
+            fs = FileSystemStorage()
+            filename = fs.save(passport.name, passport)
+            passport_url = fs.url(filename)
+            try:
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=4,
+                                                      first_name=first_name, last_name=last_name,
+                                                      profile_pic=passport_url)
+                user.gender = gender
+                user.address = address
+                user.lecturer.course = course
+                user.save()
+                messages.success(request, "Successfully Added")
+                return redirect(reverse('add_lecturer'))
+
+            except Exception as e:
+                messages.error(request, "Could Not Add " + str(e))
+        else:
+            messages.error(request, "Please fulfil all requirements")
+
+    return render(request, 'hod_template/add_lecturer_template.html', context)
+
+
+def add_student(request):
+    forms = StudentForm(request.POST or None, request.FILES or None)
+    context = {'form': forms, 'page_title': 'Add Student'}
+    if request.method == 'POST':
+        if forms.is_valid():
+            first_name = forms.cleaned_data.get('first_name')
+            last_name = forms.cleaned_data.get('last_name')
+            matric_no = forms.cleaned_data.get('matric_no')
+            address = forms.cleaned_data.get('address')
+            email = forms.cleaned_data.get('email')
+            gender = forms.cleaned_data.get('gender')
+            password = forms.cleaned_data.get('password')
+            dept = forms.cleaned_data.get('dept')
+            course = forms.cleaned_data.get('course')
+            session = forms.cleaned_data.get('session')
+            term = forms.cleaned_data.get('term')
+            level = forms.cleaned_data.get('level')
             passport = request.FILES['profile_pic']
             fs = FileSystemStorage()
             filename = fs.save(passport.name, passport)
             passport_url = fs.url(filename)
             try:
-                user = CustomUser.objects.create_user(email=email, password=password, user_type=3,first_name=first_name, last_name=last_name, profile_pic=passport_url)
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=3,
+                                                      first_name=first_name, matric_no=matric_no, last_name=last_name,
+                                                      profile_pic=passport_url)
                 user.gender = gender
                 user.address = address
                 user.student.session = session
@@ -131,7 +208,6 @@ def add_student(request):
                 user.student.level = level
                 user.student.term = term
                 user.level = level
-                user.matric_no = matric_no
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_student'))
@@ -152,10 +228,12 @@ def add_dept(request):
         if form.is_valid():
             name = form.cleaned_data.get('name')
             fees = form.cleaned_data.get('fees')
+            collage = form.cleaned_data.get('collage')
             try:
                 dept = Department()
                 dept.name = name
                 dept.fees = fees
+                dept.collage = collage
                 dept.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_dept'))
@@ -164,7 +242,6 @@ def add_dept(request):
         else:
             messages.error(request, "Could Not Add")
     return render(request, 'hod_template/add_dept.html', context)
-
 
 
 def edit_dept(request, dept_id):
@@ -179,10 +256,12 @@ def edit_dept(request, dept_id):
         if form.is_valid():
             name = form.cleaned_data.get('name')
             fees = form.cleaned_data.get('fees')
+            collage = form.cleaned_data.get('collage')
             try:
                 dept = Department.objects.get(id=dept_id)
                 dept.name = name
                 dept.fees = fees
+                dept.collage = collage
                 dept.save()
                 messages.success(request, "Successfully Updated")
             except:
@@ -191,7 +270,6 @@ def edit_dept(request, dept_id):
             messages.error(request, "Could Not Update")
 
     return render(request, 'hod_template/edit_dept.html', context)
-
 
 
 def add_level(request):
@@ -216,10 +294,6 @@ def add_level(request):
     return render(request, 'hod_template/add_level.html', context)
 
 
-
-
-
-
 def add_course(request):
     form = CourseForm(request.POST or None)
     context = {
@@ -234,8 +308,8 @@ def add_course(request):
             try:
                 course = Course()
                 course.name = name
-                course.dept_info=dept_info
-                course.level_info=level_info
+                course.dept_info = dept_info
+                course.level_info = level_info
                 course.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_course'))
@@ -257,10 +331,12 @@ def add_subject(request):
             name = form.cleaned_data.get('name')
             course = form.cleaned_data.get('course')
             staff = form.cleaned_data.get('staff')
+            lecturer = form.cleaned_data.get('lecturer')
             try:
                 subject = Subject()
                 subject.name = name
                 subject.staff = staff
+                subject.lecturer = lecturer
                 subject.course = course
                 subject.save()
                 messages.success(request, "Successfully Added")
@@ -283,13 +359,13 @@ def manage_staff(request):
     return render(request, "hod_template/manage_staff.html", context)
 
 
-def manage_student(request):
-    students = CustomUser.objects.filter(user_type=3)
+def manage_lecturer(request):
+    allLecturer = CustomUser.objects.filter(user_type=4)
     context = {
-        'students': students,
-        'page_title': 'Manage Students'
+        'allLecturer': allLecturer,
+        'page_title': 'Manage Lecturer'
     }
-    return render(request, "hod_template/manage_student.html", context)
+    return render(request, "hod_template/manage_lecturer.html", context)
 
 
 def manage_course(request):
@@ -300,6 +376,7 @@ def manage_course(request):
     }
     return render(request, "hod_template/manage_course.html", context)
 
+
 def manage_dept(request):
     depts = Department.objects.all()
     context = {
@@ -307,6 +384,7 @@ def manage_dept(request):
         'page_title': 'Manage Department'
     }
     return render(request, "hod_template/manage_dept.html", context)
+
 
 def manage_level(request):
     levels = Level.objects.all()
@@ -349,9 +427,9 @@ def edit_staff(request, staff_id):
                 user = CustomUser.objects.get(id=staff.admin.id)
                 user.username = username
                 user.email = email
-                if password != None:
+                if password is not None:
                     user.set_password(password)
-                if passport != None:
+                if passport is not None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
@@ -372,6 +450,55 @@ def edit_staff(request, staff_id):
     else:
         user = CustomUser.objects.get(id=staff_id)
         staff = Staff.objects.get(id=user.id)
+        return render(request, "hod_template/edit_staff_template.html", context)
+
+
+def edit_lecturer(request, lecturer_id):
+    lecturer = get_object_or_404(Lecturer, id=lecturer_id)
+    form = LecturerForm(request.POST or None, instance=lecturer)
+    context = {
+        'form': form,
+        'lecturer_id': lecturer_id,
+        'page_title': 'Edit Lecturer'
+    }
+    if request.method == 'POST':
+        if form.is_valid():
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            address = form.cleaned_data.get('address')
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            gender = form.cleaned_data.get('gender')
+            password = form.cleaned_data.get('password') or None
+            course = form.cleaned_data.get('course')
+            passport = request.FILES.get('profile_pic') or None
+            try:
+                user = CustomUser.objects.get(id=lecturer.admin.id)
+                user.username = username
+                user.email = email
+                if password is not None:
+                    user.set_password(password)
+                if passport is not None:
+                    fs = FileSystemStorage()
+                    filename = fs.save(passport.name, passport)
+                    passport_url = fs.url(filename)
+                    user.profile_pic = passport_url
+                user.first_name = first_name
+                user.last_name = last_name
+                user.gender = gender
+                user.address = address
+                lecturer.course = course
+                user.save()
+                lecturer.save()
+                messages.success(request, "Successfully Updated")
+                return redirect(reverse('edit_lecturer', args=[lecturer_id]))
+            except Exception as e:
+                messages.error(request, "Could Not Update " + str(e))
+        else:
+            messages.error(request, "Please fil form properly")
+    else:
+        user = CustomUser.objects.get(id=lecturer_id)
+        lecturer = Lecturer.objects.get(id=user.id)
         return render(request, "hod_template/edit_staff_template.html", context)
 
 
@@ -461,10 +588,13 @@ def edit_subject(request, subject_id):
             name = form.cleaned_data.get('name')
             course = form.cleaned_data.get('course')
             staff = form.cleaned_data.get('staff')
+            lecturer = form.cleaned_data.get('lecturer')
+
             try:
                 subject = Subject.objects.get(id=subject_id)
                 subject.name = name
                 subject.staff = staff
+                subject.lecturer = lecturer
                 subject.course = course
                 subject.save()
                 messages.success(request, "Successfully Updated")
@@ -520,7 +650,6 @@ def manage_term(request):
     return render(request, "hod_template/manage_term.html", context)
 
 
-
 def edit_term(request, term_id):
     instance = get_object_or_404(AcademicTerm, id=term_id)
     form = AcademicTermForm(request.POST or None, instance=instance)
@@ -542,9 +671,6 @@ def edit_term(request, term_id):
 
     else:
         return render(request, "hod_template/edit_term.html", context)
-
-
-
 
 
 def edit_session(request, session_id):
@@ -575,6 +701,18 @@ def check_email_availability(request):
     email = request.POST.get("email")
     try:
         user = CustomUser.objects.filter(email=email).exists()
+        if user:
+            return HttpResponse(True)
+        return HttpResponse(False)
+    except Exception as e:
+        return HttpResponse(False)
+
+
+@csrf_exempt
+def check_matric_no_availability(request):
+    matric_no = request.POST.get("matric_no")
+    try:
+        user = CustomUser.objects.filter(matric_no=matric_no).exists()
         if user:
             return HttpResponse(True)
         return HttpResponse(False)
@@ -701,7 +839,7 @@ def get_admin_attendance(request):
         json_data = []
         for report in attendance_reports:
             data = {
-                "status":  str(report.status),
+                "status": str(report.status),
                 "name": str(report.student)
             }
             json_data.append(data)
@@ -725,9 +863,9 @@ def admin_view_profile(request):
                 password = form.cleaned_data.get('password') or None
                 passport = request.FILES.get('profile_pic') or None
                 custom_user = admin.admin
-                if password != None:
+                if password is not None:
                     custom_user.set_password(password)
-                if passport != None:
+                if passport is not None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
@@ -740,7 +878,7 @@ def admin_view_profile(request):
             else:
                 messages.error(request, "Invalid Data Provided")
         except Exception as e:
-            messages.error(request, "Error Occured While Updating Profile " + str(e))
+            messages.error(request, "Error Occurred While Updating Profile " + str(e))
     return render(request, "hod_template/admin_view_profile.html", context)
 
 
@@ -779,7 +917,7 @@ def send_student_notification(request):
             'to': student.admin.fcm_token
         }
         headers = {'Authorization':
-                   'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
+                       'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
                    'Content-Type': 'application/json'}
         data = requests.post(url, data=json.dumps(body), headers=headers)
         notification = NotificationStudent(student=student, message=message)
@@ -806,7 +944,7 @@ def send_staff_notification(request):
             'to': staff.admin.fcm_token
         }
         headers = {'Authorization':
-                   'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
+                       'key=AAAA3Bm8j_M:APA91bElZlOLetwV696SoEtgzpJr2qbxBfxVBfDWFiopBWzfCfzQp2nRyC7_A2mlukZEHV4g1AmyC6P_HonvSkY2YyliKt5tT3fe_1lrKod2Daigzhb2xnYQMxUWjCAIQcUexAMPZePB',
                    'Content-Type': 'application/json'}
         data = requests.post(url, data=json.dumps(body), headers=headers)
         notification = NotificationStaff(staff=staff, message=message)
@@ -816,91 +954,9 @@ def send_staff_notification(request):
         return HttpResponse("False")
 
 
-
-
-
-class InvoiceListView(ListView):
-    model = Invoice
-    template_name = 'hod_template/invoice_list.html'
-
-
-class InvoiceCreateView(CreateView):
-    model = Invoice
-    fields = '__all__'
-    template_name = 'hod_template/invoice_form.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(InvoiceCreateView, self).get_context_data(**kwargs)
-        if self.request.POST:
-            context['items'] = InvoiceItemFormset(
-                self.request.POST, prefix='invoiceitem_set')
-        else:
-            context['items'] = InvoiceItemFormset(prefix='invoiceitem_set')
-            
-        return context
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        formset = context['items']
-        self.object = form.save()
-        if self.object.id != None:
-            if form.is_valid() and formset.is_valid():
-                formset.instance = self.object
-                formset.save()
-        return super().form_valid(form)
-
-
-class InvoiceDetailView(DetailView):
-    model = Invoice
-    fields = '__all__'
-    template_name = 'hod_template/invoice_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(InvoiceDetailView, self).get_context_data(**kwargs)
-        context['receipts'] = Receipt.objects.filter(invoice=self.object)
-        context['items'] = InvoiceItem.objects.filter(invoice=self.object)
-        return context
-
-
-class InvoiceUpdateView(UpdateView):
-    model = Invoice
-    fields = ['student', 'session', 'term',
-               'balance_from_previous_term']
-    template_name = 'hod_template/invoice_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(InvoiceUpdateView, self).get_context_data(**kwargs)
-        if self.request.POST:
-          context['receipts'] = InvoiceReceiptFormSet(
-              self.request.POST, instance=self.object)
-          context['items'] = InvoiceItemFormset(
-              self.request.POST, instance=self.object)
-        else:
-          context['receipts'] = InvoiceReceiptFormSet(instance=self.object)
-          context['items'] = InvoiceItemFormset(instance=self.object)
-        return context
-
-    def form_valid(self, form):
-      context = self.get_context_data()
-      formset = context['receipts']
-      itemsformset = context['items']
-      if form.is_valid() and formset.is_valid() and itemsformset.is_valid():
-        form.save()
-        formset.save()
-        itemsformset.save()
-      return super().form_valid(form)
-
-
-
-class InvoiceDeleteView(DeleteView):
-    model = Invoice
-    success_url = reverse_lazy('hod_template/invoice-list')
-    template_name = 'hod_template/invoice_confirm_delete.html'
-
-
 class ReceiptCreateView(CreateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment', 'receipt_id']
     success_url = 'list'
     template_name = 'hod_template/receipt_form.html'
 
@@ -916,17 +972,13 @@ class ReceiptCreateView(CreateView):
         invoice = Invoice.objects.get(pk=self.request.GET['invoice'])
         context['invoice'] = invoice
         return context
-    
+
 
 class ReceiptUpdateView(UpdateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment']
     success_url = reverse_lazy('invoice-list')
 
-
-class ReceiptDeleteView(DeleteView):
-    model = Receipt
-    success_url = reverse_lazy('invoice-list')
 
 class SessionListView(SuccessMessageMixin, ListView):
     model = AcademicSession
@@ -937,112 +989,106 @@ class SessionListView(SuccessMessageMixin, ListView):
         context['form'] = AcademicSessionForm()
         return context
 
+
 class SessionCreateView(SuccessMessageMixin, CreateView):
-  model = AcademicSession
-  form_class = AcademicSessionForm
-  template_name = 'corecode/mgt_form.html'
-  success_url = reverse_lazy('sessions')
-  success_message = 'New session successfully added'
+    model = AcademicSession
+    form_class = AcademicSessionForm
+    template_name = 'corecode/mgt_form.html'
+    success_url = reverse_lazy('sessions')
+    success_message = 'New session successfully added'
 
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      context['title'] = 'Add new session'
-      return context
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Add new session'
+        return context
 
 
 class SessionUpdateView(SuccessMessageMixin, UpdateView):
-  model = AcademicSession
-  form_class = AcademicSessionForm
-  success_url = reverse_lazy('sessions')
-  success_message = 'Session successfully updated.'
-  template_name = 'corecode/mgt_form.html'
+    model = AcademicSession
+    form_class = AcademicSessionForm
+    success_url = reverse_lazy('sessions')
+    success_message = 'Session successfully updated.'
+    template_name = 'corecode/mgt_form.html'
 
-  def form_valid(self, form):
-    obj = self.object
-    if obj.current == False:
-      terms = AcademicSession.objects.filter(
-          current=True).exclude(name=obj.name).exists()
-      if not terms:
-        messages.warning(self.request, 'You must set a session to current.')
-        return redirect('session-list')
-    return super().form_valid(form)
+    def form_valid(self, form):
+        obj = self.object
+        if obj.current == False:
+            terms = AcademicSession.objects.filter(
+                current=True).exclude(name=obj.name).exists()
+            if not terms:
+                messages.warning(self.request, 'You must set a session to current.')
+                return redirect('session-list')
+        return super().form_valid(form)
 
 
 class SessionDeleteView(DeleteView):
-  model = AcademicSession
-  success_url = reverse_lazy('sessions')
-  template_name = 'corecode/core_confirm_delete.html'
-  success_message = "The session {} has been deleted with all its attached content"
+    model = AcademicSession
+    success_url = reverse_lazy('sessions')
+    template_name = 'corecode/core_confirm_delete.html'
+    success_message = "The session {} has been deleted with all its attached content"
 
-
-  def delete(self, request, *args, **kwargs):
-      obj = self.get_object()
-      if obj.current == True:
-        messages.warning(request, 'Cannot delete session as it is set to current')
-        return redirect('sessions')
-      messages.success(self.request, self.success_message.format(obj.name))
-      return super(SessionDeleteView, self).delete(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.current == True:
+            messages.warning(request, 'Cannot delete session as it is set to current')
+            return redirect('sessions')
+        messages.success(self.request, self.success_message.format(obj.name))
+        return super(SessionDeleteView, self).delete(request, *args, **kwargs)
 
 
 class TermListView(ListView):
-  model = AcademicTerm
-  template_name = 'hod_template/manage_term.html'
+    model = AcademicTerm
+    template_name = 'hod_template/manage_term.html'
 
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      context['form'] = AcademicTermForm()
-      return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = AcademicTermForm()
+        return context
 
 
 class TermCreateView(CreateView):
-  model = AcademicTerm
-  form_class = AcademicTermForm
-  template_name = 'corecode/mgt_form.html'
-  success_url = reverse_lazy('terms')
-  success_message = 'New term successfully added'
-
+    model = AcademicTerm
+    form_class = AcademicTermForm
+    template_name = 'corecode/mgt_form.html'
+    success_url = reverse_lazy('terms')
+    success_message = 'New term successfully added'
 
 
 class TermUpdateView(UpdateView):
-  model = AcademicTerm
-  form_class = AcademicTermForm
-  success_url = reverse_lazy('terms')
-  success_message = 'Term successfully updated.'
-  template_name = 'hod_template/manage_term.html'
+    model = AcademicTerm
+    form_class = AcademicTermForm
+    success_url = reverse_lazy('terms')
+    success_message = 'Term successfully updated.'
+    template_name = 'hod_template/manage_term.html'
 
-
-  def form_valid(self, form):
-    obj = self.object
-    if obj.current == False:
-      terms = AcademicTerm.objects.filter(current=True).exclude(name=obj.name).exists()
-      if not terms:
-        messages.warning(self.request, 'You must set a term to current.')
-        return redirect('term')
-    return super().form_valid(form)
+    def form_valid(self, form):
+        obj = self.object
+        if obj.current == False:
+            terms = AcademicTerm.objects.filter(current=True).exclude(name=obj.name).exists()
+            if not terms:
+                messages.warning(self.request, 'You must set a term to current.')
+                return redirect('term')
+        return super().form_valid(form)
 
 
 class TermDeleteView(DeleteView):
-  model = AcademicTerm
-  success_url = reverse_lazy('terms')
-  template_name = 'corecode/core_confirm_delete.html'
-  success_message = "The term {} has been deleted with all its attached content"
+    model = AcademicTerm
+    success_url = reverse_lazy('terms')
+    template_name = 'corecode/core_confirm_delete.html'
+    success_message = "The term {} has been deleted with all its attached content"
 
-
-  def delete(self, request, *args, **kwargs):
-      obj = self.get_object()
-      if obj.current == True:
-        messages.warning(request, 'Cannot delete term as it is set to current')
-        return redirect('terms')
-      messages.success(self.request, self.success_message.format(obj.name))
-      return super(TermDeleteView, self).delete(request, *args, **kwargs)
-
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.current:
+            messages.warning(request, 'Cannot delete term as it is set to current')
+            return redirect('terms')
+        messages.success(self.request, self.success_message.format(obj.name))
+        return super(TermDeleteView, self).delete(request, *args, **kwargs)
 
 
 def current_session_view(request):
-    
-      """ Current SEssion and Term """
-      if request.method == 'POST':
+    """ Current SEssion and Term """
+    if request.method == 'POST':
         form = CurrentSessionForm(request.POST)
         if form.is_valid():
             session = form.cleaned_data['current_session']
@@ -1054,32 +1100,31 @@ def current_session_view(request):
 
         else:
             form = CurrentSessionForm(initial={
-            "current_session": AcademicSession.objects.filter(current=True),
-            "current_term": AcademicTerm.objects.filter(current=True)
-        })
+                "current_session": AcademicSession.objects.filter(current=True),
+                "current_term": AcademicTerm.objects.filter(current=True)
+            })
+
+        return render(request, 'corecode/current_session.html', {"form": form})
 
 
-        return render(request, 'corecode/current_session.html', {"form":form})
+def bulk_invoice(request):
+    return render(request, 'corecode/bulk_invoice.html')
 
 
+class StudentBulkUploadView(CreateView):
+    model = StudentBulkUpload
+    template_name = 'corecode/students_upload.html'
+    fields = ['csv_file']
+    success_url = reverse_lazy('manage_student')
+    success_message = 'Successfully uploaded students'
 
 
-class StudentDetailView(DetailView):
-    model = CustomUser
-    template_name = "corecode/student_detail.html"
+def downloadcsv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="student_template.csv"'
 
-    def get_context_data(self, **kwargs):
-        context = super(StudentDetailView, self).get_context_data(**kwargs)
-        return context
-   
- 
-class StudentDeleteView(DeleteView):
-    model = CustomUser
-    success_url = reverse_lazy('student-list')
-    template_name = "corecode/student_confirm_delete.html"
-    
-    
-    
-    
+    writer = csv.writer(response)
+    writer.writerow(['matric_no', 'surname',
+                     'firstname', 'other_names', 'gender', 'mobile_number', 'address'])
 
-
+    return response

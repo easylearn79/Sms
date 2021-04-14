@@ -1,7 +1,7 @@
 /* LOGIN FORM */
 
 .login {
-    background: #f8f8f8;
+    background: #0cbda5;
     background-image: url('{% static "images/bg2.jpg" %}');
     height: auto;
 }

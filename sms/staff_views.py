@@ -3,15 +3,13 @@ import json
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponseRedirect, get_object_or_404,redirect, render)
+from django.shortcuts import (HttpResponseRedirect, get_object_or_404, redirect, render)
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from qr_code.qrcode.utils import ContactDetail, WifiConfig, Coordinates, QRCodeOptions
 
 from .forms import *
 from .models import *
-
-
-
 
 from .forms import InvoiceItemFormset, InvoiceReceiptFormSet, Invoices
 
@@ -20,7 +18,12 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView, DetailView
 from django.contrib.messages.views import SuccessMessageMixin
 
-from .forms import  AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
+from .forms import AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
+
+
+class StaffListView(ListView):
+    model = Staff
+    template_name = 'staff_template/home_content.html',
 
 
 def staff_home(request):
@@ -39,7 +42,7 @@ def staff_home(request):
         subject_list.append(subject.name)
         attendance_list.append(attendance_count)
     context = {
-        'invoice':invoice,
+        'invoice': invoice,
         'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.course) + ')',
         'total_students': total_students,
         'total_attendance': total_attendance,
@@ -56,12 +59,12 @@ def staff_confirm_payment(request):
     invoice = Invoice.objects.filter()
     sessions = AcademicSession.objects.all()
     context = {
-        'staff':staff,
-        'invoice':invoice,
-        'sessions':sessions,
+        'staff': staff,
+        'invoice': invoice,
+        'sessions': sessions,
         'page_title': 'Comfirm Payment'
     }
-    
+
     return render(request, 'staff_template/invoice_list.html', context)
 
 
@@ -90,9 +93,9 @@ def get_students(request):
         student_data = []
         for student in students:
             data = {
-                    "id": student.id,
-                    "name": student.admin.last_name + " " + student.admin.first_name
-                    }
+                "id": student.id,
+                "name": student.admin.last_name + " " + student.admin.first_name
+            }
             student_data.append(data)
         return JsonResponse(json.dumps(student_data), content_type='application/json', safe=False)
     except Exception as e:
@@ -114,7 +117,8 @@ def save_attendance(request):
 
         for student_dict in students:
             student = get_object_or_404(Student, id=student_dict.get('id'))
-            attendance_report = AttendanceReport(student=student, attendance=attendance, status=student_dict.get('status'))
+            attendance_report = AttendanceReport(student=student, attendance=attendance,
+                                                 status=student_dict.get('status'))
             attendance_report.save()
     except Exception as e:
         return None
@@ -221,7 +225,7 @@ def staff_feedback(request):
 
 def staff_view_profile(request):
     staff = get_object_or_404(Staff, admin=request.user)
-    form = StaffEditForm(request.POST or None, request.FILES or None,instance=staff)
+    form = StaffEditForm(request.POST or None, request.FILES or None, instance=staff)
     context = {'form': form, 'page_title': 'View/Update Profile'}
     if request.method == 'POST':
         try:
@@ -281,38 +285,6 @@ def staff_view_notification(request):
     return render(request, "staff_template/staff_view_notification.html", context)
 
 
-def staff_add_result(request):
-    staff = get_object_or_404(Staff, admin=request.user)
-    subjects = Subject.objects.filter(staff=staff)
-    sessions = AcademicSession.objects.all()
-    context = {
-        'page_title': 'Result Upload',
-        'subjects': subjects,
-        'sessions': sessions
-    }
-    if request.method == 'POST':
-        try:
-            student_id = request.POST.get('student_list')
-            subject_id = request.POST.get('subject')
-            test = request.POST.get('test')
-            exam = request.POST.get('exam')
-            student = get_object_or_404(Student, id=student_id)
-            subject = get_object_or_404(Subject, id=subject_id)
-            try:
-                data = StudentResult.objects.get(
-                    student=student, subject=subject)
-                data.exam = exam
-                data.test = test
-                data.save()
-                messages.success(request, "Scores Updated")
-            except:
-                result = StudentResult(student=student, subject=subject, test=test, exam=exam)
-                result.save()
-                messages.success(request, "Scores Saved")
-        except Exception as e:
-            messages.warning(request, "Error Occured While Processing Form")
-    return render(request, "staff_template/staff_add_result.html", context)
-
 @csrf_exempt
 def fetch_student_result(request):
     try:
@@ -330,7 +302,6 @@ def fetch_student_result(request):
         return HttpResponse('False')
 
 
-
 def staff_update_attendance(request):
     staff = get_object_or_404(Staff, admin=request.user)
     subjects = Subject.objects.filter(staff_id=staff)
@@ -344,12 +315,9 @@ def staff_update_attendance(request):
     return render(request, 'staff_template/staff_update_attendance.html', context)
 
 
-
-
-
 class InvoiceListView(ListView):
     model = Invoice
-    template_name = 'invoice_list.html'
+    template_name = 'hod_template/invoice_list.html'
 
 
 class InvoiceCreateView(CreateView):
@@ -365,7 +333,7 @@ class InvoiceCreateView(CreateView):
                 self.request.POST, prefix='invoiceitem_set')
         else:
             context['items'] = InvoiceItemFormset(prefix='invoiceitem_set')
-            
+
         return context
 
     def form_valid(self, form):
@@ -393,31 +361,30 @@ class InvoiceDetailView(DetailView):
 
 class InvoiceUpdateView(UpdateView):
     model = Invoice
-    fields = ['student', 'session', 'term',
-              'class_for', 'balance_from_previous_term']
+    fields = ['student', 'session', 'term', 'balance_from_previous_term', 'level_info']
+    template_name = 'invoice_form.html'
 
     def get_context_data(self, **kwargs):
         context = super(InvoiceUpdateView, self).get_context_data(**kwargs)
         if self.request.POST:
-          context['receipts'] = InvoiceReceiptFormSet(
-              self.request.POST, instance=self.object)
-          context['items'] = InvoiceItemFormset(
-              self.request.POST, instance=self.object)
+            context['receipts'] = InvoiceReceiptFormSet(
+                self.request.POST, instance=self.object)
+            context['items'] = InvoiceItemFormset(
+                self.request.POST, instance=self.object)
         else:
-          context['receipts'] = InvoiceReceiptFormSet(instance=self.object)
-          context['items'] = InvoiceItemFormset(instance=self.object)
+            context['receipts'] = InvoiceReceiptFormSet(instance=self.object)
+            context['items'] = InvoiceItemFormset(instance=self.object)
         return context
 
     def form_valid(self, form):
-      context = self.get_context_data()
-      formset = context['receipts']
-      itemsformset = context['items']
-      if form.is_valid() and formset.is_valid() and itemsformset.is_valid():
-        form.save()
-        formset.save()
-        itemsformset.save()
-      return super().form_valid(form)
-
+        context = self.get_context_data()
+        formset = context['receipts']
+        itemsformset = context['items']
+        if form.is_valid() and formset.is_valid() and itemsformset.is_valid():
+            form.save()
+            formset.save()
+            itemsformset.save()
+        return super().form_valid(form)
 
 
 class InvoiceDeleteView(DeleteView):
@@ -426,10 +393,9 @@ class InvoiceDeleteView(DeleteView):
     template_name = 'invoice_confirm_delete.html'
 
 
-
 class ReceiptCreateView(CreateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment']
     success_url = reverse_lazy('invoice-list')
     template_name = 'receipt_form.html'
 
@@ -445,7 +411,7 @@ class ReceiptCreateView(CreateView):
         invoice = Invoice.objects.get(pk=self.request.GET['invoice'])
         context['invoice'] = invoice
         return context
-    
+
 
 class ReceiptUpdateView(UpdateView):
     model = Receipt
@@ -468,7 +434,6 @@ class SessionListView(SuccessMessageMixin, ListView):
         return context
 
 
-
 class SessionCreateView(SuccessMessageMixin, CreateView):
     model = AcademicSession
     form_class = AcademicSessionForm
@@ -482,99 +447,92 @@ class SessionCreateView(SuccessMessageMixin, CreateView):
         return context
 
 
-
 class SessionUpdateView(SuccessMessageMixin, UpdateView):
-  model = AcademicSession
-  form_class = AcademicSessionForm
-  success_url = reverse_lazy('sessions')
-  success_message = 'Session successfully updated.'
-  template_name = 'corecode/mgt_form.html'
+    model = AcademicSession
+    form_class = AcademicSessionForm
+    success_url = reverse_lazy('sessions')
+    success_message = 'Session successfully updated.'
+    template_name = 'corecode/mgt_form.html'
 
-  def form_valid(self, form):
-    obj = self.object
-    if obj.current == False:
-      terms = AcademicSession.objects.filter(
-          current=True).exclude(name=obj.name).exists()
-      if not terms:
-        messages.warning(self.request, 'You must set a session to current.')
-        return redirect('session-list')
-    return super().form_valid(form)
+    def form_valid(self, form):
+        obj = self.object
+        if obj.current == False:
+            terms = AcademicSession.objects.filter(
+                current=True).exclude(name=obj.name).exists()
+            if not terms:
+                messages.warning(self.request, 'You must set a session to current.')
+                return redirect('session-list')
+        return super().form_valid(form)
 
 
 class SessionDeleteView(DeleteView):
-  model = AcademicSession
-  success_url = reverse_lazy('sessions')
-  template_name = 'corecode/core_confirm_delete.html'
-  success_message = "The session {} has been deleted with all its attached content"
+    model = AcademicSession
+    success_url = reverse_lazy('sessions')
+    template_name = 'corecode/core_confirm_delete.html'
+    success_message = "The session {} has been deleted with all its attached content"
 
-
-  def delete(self, request, *args, **kwargs):
-      obj = self.get_object()
-      if obj.current == True:
-        messages.warning(request, 'Cannot delete session as it is set to current')
-        return redirect('sessions')
-      messages.success(self.request, self.success_message.format(obj.name))
-      return super(SessionDeleteView, self).delete(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.current == True:
+            messages.warning(request, 'Cannot delete session as it is set to current')
+            return redirect('sessions')
+        messages.success(self.request, self.success_message.format(obj.name))
+        return super(SessionDeleteView, self).delete(request, *args, **kwargs)
 
 
 class TermListView(SuccessMessageMixin, ListView):
-  model = AcademicTerm
-  template_name = 'corecode/term_list.html'
+    model = AcademicTerm
+    template_name = 'corecode/term_list.html'
 
-  def get_context_data(self, **kwargs):
-      context = super().get_context_data(**kwargs)
-      context['form'] = AcademicTermForm()
-      return context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = AcademicTermForm()
+        return context
 
 
 class TermCreateView(SuccessMessageMixin, CreateView):
-  model = AcademicTerm
-  form_class = AcademicTermForm
-  template_name = 'corecode/mgt_form.html'
-  success_url = reverse_lazy('terms')
-  success_message = 'New term successfully added'
-
+    model = AcademicTerm
+    form_class = AcademicTermForm
+    template_name = 'corecode/mgt_form.html'
+    success_url = reverse_lazy('terms')
+    success_message = 'New term successfully added'
 
 
 class TermUpdateView(SuccessMessageMixin, UpdateView):
-  model = AcademicTerm
-  form_class = AcademicTermForm
-  success_url = reverse_lazy('terms')
-  success_message = 'Term successfully updated.'
-  template_name = 'corecode/mgt_form.html'
+    model = AcademicTerm
+    form_class = AcademicTermForm
+    success_url = reverse_lazy('terms')
+    success_message = 'Term successfully updated.'
+    template_name = 'corecode/mgt_form.html'
 
-
-  def form_valid(self, form):
-    obj = self.object
-    if obj.current == False:
-      terms = AcademicTerm.objects.filter(current=True).exclude(name=obj.name).exists()
-      if not terms:
-        messages.warning(self.request, 'You must set a term to current.')
-        return redirect('term')
-    return super().form_valid(form)
+    def form_valid(self, form):
+        obj = self.object
+        if obj.current == False:
+            terms = AcademicTerm.objects.filter(current=True).exclude(name=obj.name).exists()
+            if not terms:
+                messages.warning(self.request, 'You must set a term to current.')
+                return redirect('term')
+        return super().form_valid(form)
 
 
 class TermDeleteView(DeleteView):
-  model = AcademicTerm
-  success_url = reverse_lazy('terms')
-  template_name = 'corecode/core_confirm_delete.html'
-  success_message = "The term {} has been deleted with all its attached content"
+    model = AcademicTerm
+    success_url = reverse_lazy('terms')
+    template_name = 'corecode/core_confirm_delete.html'
+    success_message = "The term {} has been deleted with all its attached content"
 
-
-  def delete(self, request, *args, **kwargs):
-      obj = self.get_object()
-      if obj.current == True:
-        messages.warning(request, 'Cannot delete term as it is set to current')
-        return redirect('terms')
-      messages.success(self.request, self.success_message.format(obj.name))
-      return super(TermDeleteView, self).delete(request, *args, **kwargs)
-
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.current == True:
+            messages.warning(request, 'Cannot delete term as it is set to current')
+            return redirect('terms')
+        messages.success(self.request, self.success_message.format(obj.name))
+        return super(TermDeleteView, self).delete(request, *args, **kwargs)
 
 
 def current_session_view(request):
-    
-      """ Current SEssion and Term """
-      if request.method == 'POST':
+    """ Current SEssion and Term """
+    if request.method == 'POST':
         form = CurrentSessionForm(request.POST)
         if form.is_valid():
             session = form.cleaned_data['current_session']
@@ -586,14 +544,8 @@ def current_session_view(request):
 
         else:
             form = CurrentSessionForm(initial={
-            "current_session": AcademicSession.objects.filter(current=True),
-            "current_term": AcademicTerm.objects.filter(current=True)
-        })
+                "current_session": AcademicSession.objects.filter(current=True),
+                "current_term": AcademicTerm.objects.filter(current=True)
+            })
 
-
-        return render(request, 'corecode/current_session.html', {"form":form})
-
-
-
-
-
+        return render(request, 'corecode/current_session.html', {"form": form})

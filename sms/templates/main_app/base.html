@@ -12,17 +12,18 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css'%} ">
-  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" integrity="sha384-vSIIfh2YWi9wW0r9iZe7RJPrKwp6bG+s9QZMoITbCckVJqGCCRhc+ccxNcdpHuYu" crossorigin="anonymous">
+
   
   <link rel="stylesheet" href="{% static 'plugins/Datatables/datatables.min.css' %}" />
 
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Tempusdominus Bbootstrap 4 -->
-  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css'%} ">
+
+  <!-- JQVMap --><link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css'%} ">
   <!-- iCheck -->
   <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css'%} ">
-  <!-- JQVMap -->
   <link rel="stylesheet" href="{% static 'plugins/jqvmap/jqvmap.min.css'%} ">
   <!-- Theme style -->
   <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css'%} ">
@@ -39,7 +40,7 @@
   {% endblock custom_css %}
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body  class="hold-transition sidebar-mini layout-fixed">
   <div class="wrapper">
 
   <!-- Navbar -->
@@ -87,7 +88,7 @@
           <div class="row">
             <div class="col-md-12">
               {% block fullcard %}
-              <div class="card">
+              <div class="card" >
                 {% block content-header %}{% endblock content-header %}
                 <div class="card-body">
                   <div class="row">

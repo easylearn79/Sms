@@ -1,25 +1,21 @@
 import json
-import math
 from datetime import datetime
 
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponseRedirect, get_object_or_404,
+from django.shortcuts import (get_object_or_404,
                               redirect, render)
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from django.views.generic import ListView, DetailView, DetailView
+from django.views.generic import DetailView
 
 from .forms import *
 from .models import *
 
 
-def error_404_view(request,exception):
+def error_404_view(request):
     return render(request, 'student_template/404.html')
-    
-
 
 
 def student_home(request):
@@ -29,8 +25,8 @@ def student_home(request):
     total_subject = Subject.objects.filter(course=student.course).count()
     subjects = Subject.objects.filter(course=student.course)
     context = {
-        'receipts':receipts,
-        'invoice':invoice,
+        'receipts': receipts,
+        'invoice': invoice,
         'total_subject': total_subject,
         'subjects': subjects,
         'page_title': 'Student Homepage'
@@ -39,7 +35,7 @@ def student_home(request):
     return render(request, 'student_template/home_content.html', context)
 
 
-@ csrf_exempt
+@csrf_exempt
 def student_view_attendance(request):
     student = get_object_or_404(Student, admin=request.user)
     if request.method != 'POST':
@@ -64,14 +60,13 @@ def student_view_attendance(request):
             json_data = []
             for report in attendance_reports:
                 data = {
-                    "date":  str(report.attendance.date),
+                    "date": str(report.attendance.date),
                     "status": report.status
                 }
                 json_data.append(data)
             return JsonResponse(json.dumps(json_data), safe=False)
         except Exception as e:
             return None
-
 
 
 def student_view_result(request):
@@ -84,7 +79,6 @@ def student_view_result(request):
     return render(request, "student_template/student_view_result.html", context)
 
 
-
 def student_view_receipt(request):
     student = get_object_or_404(Student, admin=request.user)
     receipts = Receipt.objects.filter(student=student)
@@ -95,7 +89,6 @@ def student_view_receipt(request):
     return render(request, "student_template/student_view_receipt.html", context)
 
 
-
 def student_view_invoice(request):
     student = get_object_or_404(Student, admin=request.user)
     invoices = Invoice.objects.filter(student=student)
@@ -103,7 +96,7 @@ def student_view_invoice(request):
         'invoices': invoices,
         'page_title': "invoice"
     }
-    return render(request,"student_template/student_view_invoice.html", context)
+    return render(request, "student_template/student_view_invoice.html", context)
 
 
 def student_view_profile(request):
@@ -123,9 +116,9 @@ def student_view_profile(request):
                 gender = form.cleaned_data.get('gender')
                 passport = request.FILES.get('profile_pic') or None
                 admin = student.admin
-                if password != None:
+                if password is not None:
                     admin.set_password(password)
-                if passport != None:
+                if passport is not None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
@@ -141,7 +134,7 @@ def student_view_profile(request):
             else:
                 messages.error(request, "Invalid Data Provided")
         except Exception as e:
-            messages.error(request, "Error Occured While Updating Profile " + str(e))
+            messages.error(request, "Error Occurred While Updating Profile " + str(e))
 
     return render(request, "student_template/student_view_profile.html", context)
 
@@ -156,10 +149,8 @@ def student_fcmtoken(request):
         return HttpResponse("True")
     except Exception as e:
         return HttpResponse("False")
-    
-    
-    
-    
+
+
 class InvoiceDetailVie(DetailView):
     model = Invoice
     fields = '__all__'
@@ -170,8 +161,8 @@ class InvoiceDetailVie(DetailView):
         context['receipts'] = Receipt.objects.filter(invoice=self.object)
         context['items'] = InvoiceItem.objects.filter(invoice=self.object)
         return context
-    
-    
+
+
 class ReceiptDetailView(DetailView):
     model = Receipt
     fields = '__all__'
@@ -182,21 +173,8 @@ class ReceiptDetailView(DetailView):
         context['receipts'] = Receipt.objects.filter(invoice=self.object)
         context['page_title'] = 'student'
         return context
-    
-    
-    
-    
+
+
 def student_list(request):
     students = Student.objects.all()
-    return render(request, 'student_template/student_list.html', {"students":students})
-
-
-
-
-
-
-
-
-
-
-
+    return render(request, 'student_template/student_list.html', {"students": students})

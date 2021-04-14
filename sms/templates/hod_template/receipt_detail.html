@@ -11,6 +11,9 @@
       <th>Amount Paid</th>
       <th>Date Paid</th>
       <th>Comment Paid</th>
+      <th>Bank_Name</th>
+      <th>Branch</th>
+      <th>Mode_Of_Payment</th>
       <th>QRCODE</th>
     </tr>
   </thead>
@@ -21,6 +24,9 @@
       <td>{{ receipt.amount_paid}}</td>
       <td>{{ receipt.date_paid}}</td>
       <td>{{ receipt.comment}}</td>
+      <td>{{ receipt.bank_name}}</td>
+      <td>{{ receipt.branch}}</td>
+      <td>{{ receipt.mode_of_payment}}</td>
       <td> <img src={{receipt.qr_code.url}}></td>
     </tr>
     {% endfor %}

@@ -4,8 +4,6 @@ from django.forms import inlineformset_factory, modelformset_factory
 
 from .models import *
 
-
-
 InvoiceItemFormset = inlineformset_factory(
     Invoice, InvoiceItem, fields=['description', 'amount'], extra=1, can_delete=True)
 
@@ -48,7 +46,7 @@ class CustomUserForm(FormSettings):
             if self.instance.pk is not None:
                 self.fields['password'].widget.attrs['placeholder'] = "Fill this only if you wish to update password"
 
-    def clean_email(self, *args, **kwargs):
+    def clean_email(self):
         formEmail = self.cleaned_data['email'].lower()
         if self.instance.pk is None:  # Insert
             if CustomUser.objects.filter(email=formEmail).exists():
@@ -63,9 +61,24 @@ class CustomUserForm(FormSettings):
 
         return formEmail
 
+    def clean_matric_no(self, *args, **kwargs):
+        formMatric_No = self.cleaned_data['matric_no']
+        if self.instance.pk is None:  # Insert
+            if CustomUser.objects.filter(matric_no=formMatric_No).exists():
+                raise forms.ValidationError(
+                    "The given Matric_No is already registered")
+        else:  # Update
+            dbformMatric_No = self.Meta.model.objects.get(
+                id=self.instance.pk).admin.matric_no
+            if dbformMatric_No != formMatric_No:  # There has been changes
+                if CustomUser.objects.filter(matric_no=formMatric_No).exists():
+                    raise forms.ValidationError("The given Matric_No is already registered")
+
+        return formMatric_No
+
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
+        fields = ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address', 'matric_no']
 
 
 class StudentForm(CustomUserForm):
@@ -75,7 +88,7 @@ class StudentForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'session', 'dept','level','term']
+                 ['course', 'session', 'dept', 'level', 'term']
 
 
 class AdminForm(CustomUserForm):
@@ -93,7 +106,18 @@ class StaffForm(CustomUserForm):
 
     class Meta:
         model = Staff
-        fields =['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
+        fields = CustomUserForm.Meta.fields + \
+                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address', 'course']
+
+
+class LecturerForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(LecturerForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Lecturer
+        fields = CustomUserForm.Meta.fields + \
+                 ['course']
 
 
 class CourseForm(FormSettings):
@@ -104,6 +128,7 @@ class CourseForm(FormSettings):
         fields = ['name']
         model = Course
 
+
 class DepartmentForm(FormSettings):
     def __init__(self, *args, **kwargs):
         super(DepartmentForm, self).__init__(*args, **kwargs)
@@ -111,6 +136,7 @@ class DepartmentForm(FormSettings):
     class Meta:
         fields = ['name']
         model = Department
+
 
 class LevelForm(FormSettings):
     def __init__(self, *args, **kwargs):
@@ -120,6 +146,7 @@ class LevelForm(FormSettings):
         fields = ['name']
         model = Level
 
+
 class SubjectForm(FormSettings):
 
     def __init__(self, *args, **kwargs):
@@ -127,7 +154,7 @@ class SubjectForm(FormSettings):
 
     class Meta:
         model = Subject
-        fields = ['name', 'staff', 'course']
+        fields = ['name', 'staff', 'lecturer', 'course']
 
 
 class AcademicSessionForm(FormSettings):
@@ -137,8 +164,8 @@ class AcademicSessionForm(FormSettings):
     class Meta:
         model = AcademicSession
         fields = '__all__'
-     
-     
+
+
 class AcademicTermForm(FormSettings):
     def __init__(self, *args, **kwargs):
         super(AcademicTermForm, self).__init__(*args, **kwargs)
@@ -146,7 +173,7 @@ class AcademicTermForm(FormSettings):
     class Meta:
         model = AcademicTerm
         fields = '__all__'
-     
+
 
 class LeaveReportStaffForm(FormSettings):
     def __init__(self, *args, **kwargs):
@@ -199,7 +226,8 @@ class StudentEditForm(CustomUserForm):
     class Meta:
         model = Student
         fields = CustomUserForm.Meta.fields + \
-        ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', 'address' ]
+                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address']
+
 
 class StaffEditForm(CustomUserForm):
     def __init__(self, *args, **kwargs):
@@ -207,6 +235,15 @@ class StaffEditForm(CustomUserForm):
 
     class Meta(CustomUserForm.Meta):
         model = Staff
+        fields = CustomUserForm.Meta.fields
+
+
+class LecturerEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(LecturerEditForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Lecturer
         fields = CustomUserForm.Meta.fields
 
 
@@ -223,15 +260,6 @@ class EditResultForm(FormSettings):
         fields = ['session_year', 'subject', 'student', 'test', 'exam']
 
 
-
-
-
-
-
-
-
-
-
 from django.forms import inlineformset_factory, modelformset_factory
 from django.forms import ModelForm, modelformset_factory
 
@@ -242,28 +270,33 @@ InvoiceItemFormset = inlineformset_factory(
     Invoice, InvoiceItem, fields=['description', 'amount'], extra=1, can_delete=True)
 
 InvoiceReceiptFormSet = inlineformset_factory(
-    Invoice, Receipt, fields=('amount_paid', 'date_paid', 'comment'), extra=0, can_delete=True
+    Invoice, Receipt, fields=('amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment'), extra=0,
+    can_delete=True
 )
 
 Invoices = modelformset_factory(Invoice, exclude=(), extra=4)
 
 
-
-
-
 class AcademicSessionForm(ModelForm):
-  prefix = 'Academic Session'
-  class Meta:
-    model = AcademicSession
-    fields = ['name','current']
+    prefix = 'Academic Session'
+
+    class Meta:
+        model = AcademicSession
+        fields = ['name', 'current']
+
 
 class AcademicTermForm(ModelForm):
-  prefix = 'Academic Term'
-  class Meta:
-    model = AcademicTerm
-    fields = ['name','current']
+    prefix = 'Academic Term'
+
+    class Meta:
+        model = AcademicTerm
+        fields = ['name', 'current']
 
 
 class CurrentSessionForm(forms.Form):
-    current_session = forms.ModelChoiceField(queryset=AcademicSession.objects.all(), help_text='Click <a href="/session/create/?next=current-session/">here</a> to add new session')
-    current_term = forms.ModelChoiceField(queryset=AcademicTerm.objects.all(), help_text='Click <a href="/term/create/?next=current-session/">here</a> to add new term')
+    current_session = forms.ModelChoiceField(queryset=AcademicSession.objects.all(),
+                                             help_text='Click <a href="/session/create/?next=current-session/">here'
+                                                       '</a> to add new session')
+    current_term = forms.ModelChoiceField(queryset=AcademicTerm.objects.all(),
+                                          help_text='Click <a href="/term/create/?next=current-session/">here</a> to '
+                                                    'add new term')

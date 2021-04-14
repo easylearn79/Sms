@@ -1,103 +1,149 @@
 {% extends 'main_app/base.html' %}
+
 {% load humanize %}
+{% load qr_code %}
+{% block page_title %}{{invoice}}{% endblock page_title %}
 
-{% block page_title %}{{object}}{% endblock page_title %}
-{% block content-header %}
-<div class="card-header">
-  <div class="card-tools">
-    <a href="#" class="btn btn-tool" style="color: #4CAF50;" onclick="window.print()">Print</a>
-</div>
-{% endblock content-header %}
+<!DOCTYPE html>
+{% load static%}
+
 {% block content %}
-<h1 style="text-align: center; color:#0a0a0a">Oduduwa University Receipt</h1>
-<div class="row">
-  <div class="col-md-4">
-    <!-- Sidebar user panel (optional) -->
-      <div class="card mb-3 box-shadow">
-          <img src="{{ request.user.profile_pic}}" class="card-img-top" alt="User Image">
-      </div>
-    <h3>{{ object }} </h3>
-    <h5>Session : {{ object.session }} </h5>
-    <h5>Term: {{ object.term }} </h5>
-    <h5>Dept : {{ object.dept_info }} </h5>
-    <h5>Level : {{ object.level_info }} </h5>
-    <h6>Status: {{ object.get_status_display }} </h6>
-    <hr>
-    <div>
-      <h4>Expected Balance: {{ object.balance | intcomma }}</h4>
+    <body>
+      <link rel="stylesheet" href="{%static 'css/invoice-template-1.css' %}" media="all" />
+    <header class="clearfix"  >
+    <div class="card-tools" style="text-align: right">
+        <a href="#" class="btn btn-tool" style="color: #4CAF50;" onclick="window.print()">Print</a>
+
+    </a>
     </div>
-  </div>
-  <div class="col-sm-8">
-    <table class="table table-sm table-bordered">
-      Invoice Breakdown</br>
-      <thead class="thead-light">
-        <tr>
-          <th>S/N</th>
-          <th>Description</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody>
+      <div id="logo" >
+                    <div class="logo"><img src="{% static 'images/bg4.png' %}" style="width: 154px; height:116px; background-color: #4cae4c"></div>
+
+
+      </div>
+        <div id="logos">
+            {% for receipt in receipts %}
+                <img src="{{receipt.qr_code.url}}" style="width: 134px; height:116px">
+            {% endfor %}
+        </div>
+
+      <div id="company">
+          <div class="row">
+              <div class="col-sm-12" style="text-align: center; padding-left: 40px; color: darkblue"><h4> <strong>ODUDUWA UNIVERSITY</strong>  </h4></div>
+            <div class="col-sm-12" style="text-align: center; padding-left: 20px; color: black"><h5><b>IPETUMODU, P.M.B, 5533, ILE-IFE, NIG, W/A</b></h5></div>
+              <div class="col-sm-12" style=" text-align: center; padding-left: 20px; color: yellow; "><h5 style=" background-color: red;"><b><i>{{ object.term }} REGULAR (FEES) RECEIPT ENDING {{ object.session }}</i></b></h5></div>
+
+          </div>
+      </div>
+    </header>
+
+    <main class="col-sm-12" >
+      <div id="details" class="clearfix">
+        <div id="client">
+          <div class="to">INVOICE TO:</div>
+          <h2 class="name"><br>{{object}}</h2>
+          <div class="name">Session : {{ object.session }}</div>
+          <div class="email">Term: {{ object.term }} <a href="mailto:"></a></div>
+            <div class="email">Gender : {{ request.user.gender}}<a href="mailto:"></a></div>
+            <div class="name">Dept : {{ object.dept_info }}</div>
+            <div class="name">Level : {{ object.level_info }}</div>
+            <div class="name">Status: {{ object.get_status_display }}</div>
+        </div>
+        <div id="invoice">
+          <h1>{{invoice_id}}</h1>
+            <div class="logo"><img src="{{ request.user.profile_pic}}"  style="width: 134px; height:116px"></div>        </div>
+      </div>
+      <table border="0" cellspacing="0" cellpadding="0">
+        <thead>
+          <tr>
+            <th class="no">S/N</th>
+            <th class="desc">DESCRIPTION</th>
+            <th class="total">Amount</th>
+              <th class="qty">Unit</th>
+            <th class="total">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
         {% for item in items %}
-        <tr>
-          <td>{{ forloop.counter }} </td>
-          <td>{{ item.description }} </td>
-          <td>{{ item.amount }} </td>
-        </tr>
+          <tr>
+            <td class="no">{{forloop.counter}}</td>
+            <td class="desc">{{item.description}}</td>
+            <td class="total">#{{item.amount | intcomma }}</td>
+          <td class="desc">{{forloop.counter}}</td>
+          <td class="total">#{{item.amount | intcomma}}</td>
+		  </tr>
         {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td></td>
-          <td>Total Amount this term</td>
-          <td>{{ object.amount_payable | intcomma}}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Balance from previous term</td>
-          <td>{{ object.balance_from_previous_term | intcomma }}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Total Amount Payable</td>
-          <td>{{ object.total_amount_payable | intcomma}}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Total Amount Paid</td>
-          <td>{{ object.total_amount_paid | intcomma}}</td>
-        </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2"></td>
+            <td colspan="2" >Total Amount this term</td>
+            <td>#{{ object.amount_payable | intcomma}}</td>
+          </tr>
+          <tr>
+            <td colspan="2"></td>
+            <td colspan="2">Balance from previous term</td>
+            <td>#{{ object.balance_from_previous_term | intcomma }}</td>
+          </tr>
 
-      </tfoot>
-    </table>
-  </div>
-</div>
+          {% if total_amount_paid > amount_payable %}
+              <tr>
+            <td colspan="2"></td>
+            <td colspan="2">Over Payment</td>
+            <td>#{{ object.balance | intcomma }}</td>
+          </tr>
+          {% else %}
+               <tr>
+            <td colspan="2"></td>
+            <td colspan="2">Under Payment</td>
+            <td>#{{ object.balance | intcomma }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td colspan="2"></td>
+            <td colspan="2">Total Amount Payable</td>
+            <td>#{{ object.total_amount_payable | intcomma}}</td>
+          </tr>
+          <tr>
+            <td colspan="2"></td>
+            <td colspan="2">Total Amount Paid</td>
+            <td>#{{ object.total_amount_paid | intcomma}}</td>
+          </tr>
+        </tfoot>
+      </table>
+        <h5><b><i>Payment History</i></b></h5>
+        <table border="0" cellspacing="0" cellpadding="0">
+          <thead class="thead-light">
+            <tr>
+              <th>S/N</th>
+              <th>Amount Paid</th>
+              <th>Date Paid</th>
+              <th>Comment Paid</th>
+                <th>Mode_Of_Payment</th>
+                <th>Bank_Name</th>
+                <th>Branch</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for receipt in receipts %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>#{{ receipt.amount_paid | intcomma}}</td>
+              <td>{{ receipt.date_paid}}</td>
+              <td>{{ receipt.comment}}</td>
+                <td>{{ receipt.mode_of_payment}}</td>
+              <td>{{ receipt.bank_name}}</td>
+              <td>{{ receipt.branch}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    <br>
+    </main>
+    <footer>
+    <h6 id="notices" style="color: #0a0a0a">Students:- Go and register the above information online at <a href="https://www.odududwauniversity.edu.ng">www.odududwauniversity.edu.ng</a></h6>
+    </footer>
 
-<hr>
-
-<h5>Payment History</h5>
-<table class="table table-bordered table-sm">
-  <thead class="thead-light">
-    <tr>
-      <th>S/N</th>
-      <th>Amount Paid</th>
-      <th>Date Paid</th>
-      <th>Comment Paid</th>
-      <th>QRCODE</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for receipt in receipts %}
-    <tr>
-      <td>{{ forloop.counter }}</td>
-      <td>{{ receipt.amount_paid}}</td>
-      <td>{{ receipt.date_paid}}</td>
-      <td>{{ receipt.comment}}</td>
-      <td> <img src={{receipt.qr_code.url}}></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-
+</body>
+  <!-- Option 1: Bootstrap Bundle with Popper -->
 {% endblock content %}

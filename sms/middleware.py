@@ -14,6 +14,10 @@ class LoginCheckMiddleWare(MiddlewareMixin):
             elif user.user_type == '2': #  Staff :-/ ?
                 if modulename == 'main_app.student_views' or modulename == 'main_app.hod_views':
                     return redirect(reverse('staff_home'))
+                if modulename == 'main_app.student_views':
+                    return redirect(reverse('admin_home'))
+            elif user.user_type == '4': #  Lecturer :-/ ?
+                return redirect(reverse('lecturer_home'))
             elif user.user_type == '3': # ... or Student ?
                 if modulename == 'main_app.hod_views' or modulename == 'main_app.staff_views':
                     return redirect(reverse('student_home'))

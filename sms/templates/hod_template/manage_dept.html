@@ -18,6 +18,7 @@
                             <thead>
                                 <tr>
                                     <th> SN </th>
+                                    <th> Collage </th>
                                     <th> Dept Name </th>
                                     <th> Fees </th>
                                     <th> Edit </th>
@@ -27,6 +28,7 @@
                                 {% for dept in depts %}
                                 <tr class='clickable-row' data-href="{% url 'edit_dept' dept.id %}">
                                     <td>{{ forloop.counter }}</td>
+                                    <td>{{dept.collage}}</td>
                                     <td>{{dept.name}}</td>
                                     <td>{{dept.fees}}</td>
                                     <td><a href="{% url 'edit_dept' dept.id %}" class="btn btn-primary">Edit</a></td>

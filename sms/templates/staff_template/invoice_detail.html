@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'main_app/base.html' %}
 {% load humanize %}
+{% block page_title %}{{object}}{% endblock page_title %}
 
 {% block content-header %}
 <div class="card-header">
@@ -7,9 +8,6 @@
     <a href="#" class="btn btn-tool">Print</a>
     <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
-    </a>
-    <a href="{% url 'invoice-delete' object.id %}" class="btn btn-tool">
-      <i class="fas fa-times"></i>
     </a>
   </div>
 </div>

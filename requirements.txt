@@ -22,3 +22,4 @@ cloudinary
 boto3
 django-storages
 psycopg2==2.8.5
+django-qr-code

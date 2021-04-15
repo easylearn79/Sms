@@ -21,3 +21,4 @@ django-grappelli==2.14.3
 cloudinary
 boto3
 django-storages
+psycopg2==2.8.5

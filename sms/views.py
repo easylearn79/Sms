@@ -9,13 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 from .EmailBackend import EmailBackend
 from .models import AcademicSession, Subject
 
+
 # Create your views here.
 
 
-
-def error_404_view(request,exception):
+def error_404_view(request, exception):
     return render(request, '404.html')
-    
 
 
 def login_page(request):
@@ -29,9 +28,11 @@ def login_page(request):
         else:
             return redirect(reverse("student_home"))
     return render(request, 'main_app/login.html')
+
+
 ###
 def doLogin(request, **kwargs):
-    #Authenticate
+    # Authenticate
     user = EmailBackend.authenticate(request, username=request.POST.get('email'), password=request.POST.get('password'))
     if user != None:
         login(request, user)
@@ -46,6 +47,7 @@ def doLogin(request, **kwargs):
     else:
         messages.error(request, "Invalid details")
         return redirect("/")
+
 
 ###
 
@@ -62,7 +64,7 @@ def get_attendance(request):
     try:
         subject = get_object_or_404(Subject, id=subject_id)
         session = get_object_or_404(AcademicSession, id=session_id)
-    
+
     except Exception as e:
         return None
 

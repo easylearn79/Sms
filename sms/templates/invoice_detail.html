@@ -14,10 +14,13 @@
         <a href="#" class="btn btn-tool" style="color: #4CAF50;" onclick="window.print()">Print</a>
         <a href="{% url 'invoice-update' object.id %}" class="btn btn-tool">
       <i class="fas fa-edit"></i>
+            <a href="{% url 'inviolate' object.id %}" class="btn btn-tool">
+      <i class="fas fa-times"></i>
+    </a>
     </a>
     </div>
-      <div id="logo">
-          <div class="logo"><img src="{{ request.user.profile_pic}}"  style="width: 134px; height:116px"></div>
+      <div id="logo" >
+                    <div class="logo"><img src="{% static 'images/bg4.png' %}" style="width: 154px; height:116px; background-color: #4cae4c"></div>
       </div>
         <div id="logos">
             {% for receipt in receipts %}
@@ -27,15 +30,15 @@
 
       <div id="company">
           <div class="row">
-              <div style="text-align: center; padding-left: 80px; color: darkblue"><h4> <strong>ODUDUWA UNIVERSITY</strong>  </h4></div>
-            <div style="text-align: center; padding-left: 40px; color: black"><h5> IPETUMODU, P.M.B, 5533, ILE-IFE, NIG, W/A </h5></div>
-              <div style=" text-align: center; padding-left: 40px; color: yellow; "><h5 style=" background-color: red;"><b><i>{{ object.term }} REGULAR (FEES) RECEIPT ENDING {{ object.session }}</i></b></h5></div>
+              <div class="col-sm-12" style="text-align: center; padding-left: 40px; color: darkblue"><h4> <strong>ODUDUWA UNIVERSITY</strong>  </h4></div>
+            <div class="col-sm-12" style="text-align: center; padding-left: 20px; color: black"><h5><b>IPETUMODU, P.M.B, 5533, ILE-IFE, NIG, W/A</b></h5></div>
+              <div class="col-sm-12" style=" text-align: center; padding-left: 20px; color: yellow; "><h5 style=" background-color: red;"><b><i>{{ object.term }} REGULAR (FEES) RECEIPT ENDING {{ object.session }}</i></b></h5></div>
 
           </div>
       </div>
     </header>
 
-    <main>
+    <main class="col-sm-12">
       <div id="details" class="clearfix">
         <div id="client">
           <div class="to">INVOICE TO:</div>
@@ -59,8 +62,6 @@
             <th class="no">S/N</th>
             <th class="desc">DESCRIPTION</th>
             <th class="total">Amount</th>
-              <th class="qty">Unit</th>
-            <th class="total">TOTAL</th>
           </tr>
         </thead>
         <tbody>
@@ -69,43 +70,41 @@
             <td class="no">{{forloop.counter}}</td>
             <td class="desc">{{item.description}}</td>
             <td class="total">#{{item.amount  | intcomma}}</td>
-              <td class="desc">{{forloop.counter}}</td>
-          <td class="total">#{{item.amount  | intcomma }}</td>
 		  </tr>
         {% endfor %}
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2" >Total Amount this term</td>
+            <td colspan="1"></td>
+            <td colspan="1" >Total Amount this term</td>
             <td>{{ object.amount_payable | intcomma}}</td>
           </tr>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Balance from previous term</td>
+            <td colspan="1"></td>
+            <td colspan="1">Balance from previous term</td>
             <td>#{{ object.balance_from_previous_term | intcomma }}</td>
           </tr>
           {% if object.total_amount_paid < object.amount_payable %}
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Under Payment</td>
+            <td colspan="1"></td>
+            <td colspan="1">Under Payment</td>
             <td>#{{ object.balance | intcomma }}</td>
           </tr>
           {% else %}
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Over Payment</td>
+            <td colspan="1"></td>
+            <td colspan="1">Over Payment</td>
             <td>#{{ object.balance | intcomma }}</td>
           </tr>
           {%endif%}
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Total Amount Payable</td>
+            <td colspan="1"></td>
+            <td colspan="1">Total Amount Payable</td>
             <td>{{ object.total_amount_payable | intcomma}}</td>
           </tr>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Total Amount Paid</td>
+            <td colspan="1"></td>
+            <td colspan="1">Total Amount Paid</td>
             <td>{{ object.total_amount_paid | intcomma}}</td>
           </tr>
         </tfoot>
@@ -121,6 +120,7 @@
                 <th>Mode_Of_Payment</th>
                 <th>Bank_Name</th>
                 <th>Branch</th>
+                <th>Teller No</th>
             </tr>
           </thead>
           <tbody>
@@ -133,8 +133,7 @@
                 <td>{{ receipt.mode_of_payment}}</td>
               <td>{{ receipt.bank_name}}</td>
               <td>{{ receipt.branch}}</td>
-
-
+            <td>{{ receipt.teller_no}}</td>
             </tr>
             {% endfor %}
           </tbody>

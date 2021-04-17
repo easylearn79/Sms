@@ -395,7 +395,7 @@ class InvoiceDeleteView(DeleteView):
 
 class ReceiptCreateView(CreateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment', 'teller_no']
     success_url = reverse_lazy('invoice-list')
     template_name = 'receipt_form.html'
 
@@ -424,7 +424,7 @@ class ReceiptDeleteView(DeleteView):
     success_url = reverse_lazy('invoice-list')
 
 
-class SessionListView(SuccessMessageMixin, ListView):
+class SessionListView(ListView):
     model = AcademicSession
     template_name = 'corecode/session_list.html'
 
@@ -434,7 +434,7 @@ class SessionListView(SuccessMessageMixin, ListView):
         return context
 
 
-class SessionCreateView(SuccessMessageMixin, CreateView):
+class SessionCreateView(CreateView):
     model = AcademicSession
     form_class = AcademicSessionForm
     template_name = 'corecode/mgt_form.html'
@@ -447,7 +447,7 @@ class SessionCreateView(SuccessMessageMixin, CreateView):
         return context
 
 
-class SessionUpdateView(SuccessMessageMixin, UpdateView):
+class SessionUpdateView(UpdateView):
     model = AcademicSession
     form_class = AcademicSessionForm
     success_url = reverse_lazy('sessions')
@@ -549,3 +549,61 @@ def current_session_view(request):
             })
 
         return render(request, 'corecode/current_session.html', {"form": form})
+
+
+from django.forms import widgets
+
+
+class StudentUpdateView(UpdateView):
+    model = Student
+    fields = '__all__'
+    success_message = "Record successfully updated."
+    template_name = "student_template/student_form.html"
+
+    def edit_student(request, student_id):
+        student = get_object_or_404(Student, id=student_id)
+        form = StudentForm(request.POST or None, instance=student)
+        context = {
+            'form': form,
+            'student_id': student_id,
+            'page_title': 'Edit Student'
+        }
+        if request.method == 'POST':
+            if form.is_valid():
+                first_name = form.cleaned_data.get('first_name')
+                last_name = form.cleaned_data.get('last_name')
+                address = form.cleaned_data.get('address')
+                username = form.cleaned_data.get('username')
+                email = form.cleaned_data.get('email')
+                gender = form.cleaned_data.get('gender')
+                password = form.cleaned_data.get('password') or None
+                course = form.cleaned_data.get('course')
+                session = form.cleaned_data.get('session')
+                passport = request.FILES.get('profile_pic') or None
+                try:
+                    user = CustomUser.objects.get(id=student.admin.id)
+                    if passport != None:
+                        fs = FileSystemStorage()
+                        filename = fs.save(passport.name, passport)
+                        passport_url = fs.url(filename)
+                        user.profile_pic = passport_url
+                    user.username = username
+                    user.email = email
+                    if password != None:
+                        user.set_password(password)
+                    user.first_name = first_name
+                    user.last_name = last_name
+                    student.session = session
+                    user.gender = gender
+                    user.address = address
+                    student.course = course
+                    user.save()
+                    student.save()
+                    messages.success(request, "Successfully Updated")
+                    return redirect(reverse('edit_student', args=[student_id]))
+                except Exception as e:
+                    messages.error(request, "Could Not Update " + str(e))
+            else:
+                messages.error(request, "Please Fill Form Properly!")
+        else:
+            return render(request, "hod_template/edit_student_template.html", context)

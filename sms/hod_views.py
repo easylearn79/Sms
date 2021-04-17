@@ -183,6 +183,7 @@ def add_student(request):
             first_name = forms.cleaned_data.get('first_name')
             last_name = forms.cleaned_data.get('last_name')
             matric_no = forms.cleaned_data.get('matric_no')
+            phone_no = forms.cleaned_data.get('phone_no')
             address = forms.cleaned_data.get('address')
             email = forms.cleaned_data.get('email')
             gender = forms.cleaned_data.get('gender')
@@ -199,8 +200,9 @@ def add_student(request):
             try:
                 user = CustomUser.objects.create_user(email=email, password=password, user_type=3,
                                                       first_name=first_name, matric_no=matric_no, last_name=last_name,
-                                                      profile_pic=passport_url)
+                                                      profile_pic=passport_url, phone_no=phone_no)
                 user.gender = gender
+                user.phone_no = phone_no
                 user.address = address
                 user.student.session = session
                 user.student.course = course
@@ -518,6 +520,7 @@ def edit_student(request, student_id):
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
+            phone_no = form.cleaned_data.get('phone_no')
             password = form.cleaned_data.get('password') or None
             course = form.cleaned_data.get('course')
             session = form.cleaned_data.get('session')
@@ -537,6 +540,7 @@ def edit_student(request, student_id):
                 user.last_name = last_name
                 student.session = session
                 user.gender = gender
+                user.phone_no = phone_no
                 user.address = address
                 student.course = course
                 user.save()
@@ -1125,6 +1129,25 @@ def downloadcsv(request):
 
     writer = csv.writer(response)
     writer.writerow(['matric_no', 'surname',
-                     'firstname', 'other_names', 'gender', 'mobile_number', 'address'])
+                     'firstname', 'email', 'phone_no', 'gender', 'created_at', 'address'])
+
+    return response
+
+
+class InvoiceBulkUpload(CreateView):
+    model = InvoiceBulkUpload
+    template_name = 'corecode/bulk_invoice.html'
+    fields = ['csv_file']
+    success_url = reverse_lazy('invoice-list')
+    success_message = 'Successfully uploaded Invoice'
+
+
+def downloadcv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="student_invoice.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['student', 'session',
+                     'term', 'dept_info', 'level_info'])
 
     return response

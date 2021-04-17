@@ -131,47 +131,34 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-MEDIA_URL = '/media/'
-
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-MEDIA_URL = '/media/'
-
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = '/media/'
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATIC_URL = '/static/'
-
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-
 AUTHENTICATION_BACKENDS = ['sms.EmailBackend.EmailBackend']
 
 # STATIC_ROOT = ''
 # STATIC_URL = '/static/'
 # STATICFILES_DIRS = (os.path.join('static'), )
 
-
 AWS_ACCESS_KEY_ID = 'AKIAYBV3Z5VI4BPROK4Q'
 AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME =  'stati-files'
+AWS_STORAGE_BUCKET_NAME = 'stati-files'
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_DEFAULT_ACL = 'public-read'
+AWS_LOCATION = 'static'
 
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None
+AWS_LOCATION = 'static'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-
+DEFAULT_FILE_STORAGE = 'src.storage.MediaStorage'  # the media storage configurations
 
 
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
+MEDIA_URL = '/media/'
 
+STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 # cloudinary.config(
 # cloud_name =  "dnmgvty4i",
 # api_key =  'dnmgvty4i',

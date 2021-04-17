@@ -40,6 +40,7 @@
                                     <th>Matric_No</th>
                                     <th>Gender</th>
                                     <th>Department</th>
+                                    <th>Phone No</th>
                                     <th>Level</th>
                                     <th>Fees</th>
                                     <th>Email</th>
@@ -56,6 +57,7 @@
                                     <td>{{student.matric_no}}</td>
                                     <td>{{ student.gender}}</td>
                                     <td>{{ student.student.dept.name}}</td>
+                                <td>{{student.phone_no}}</td>
                                     <td>{{ student.student.level.name}}</td>
                                     <td>{{ student.student.dept.fees  | intcomma }}</td>
                                     <td>{{ student.email}}</td>

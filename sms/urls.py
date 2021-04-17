@@ -15,13 +15,11 @@ Including another URLconf
 """
 from django.urls import path
 from .staff_views import InvoiceCreateView, InvoiceListView, InvoiceDeleteView, InvoiceDetailView, InvoiceUpdateView, \
-    ReceiptCreateView, ReceiptUpdateView, StaffListView
+    ReceiptCreateView, ReceiptUpdateView,StudentUpdateView
 from .hod_views import StudentDetailView, StudentDeleteView, LecturerDeleteView, LecturerDetailView, \
-    StudentBulkUploadView, downloadcsv
+    StudentBulkUploadView, downloadcsv, downloadcv
 from sms.EditResultView import EditResultView
-from .student_views import InvoiceDetailVie, ReceiptDetailView, student_list
-from .lecturer_views import LecturerListView
-
+from .student_views import InvoiceDetailVie, student_list
 from . import hod_views, staff_views, student_views, views, lecturer_views
 
 urlpatterns = [
@@ -65,6 +63,8 @@ urlpatterns = [
     path("subject/edit/<int:subject_id>", hod_views.edit_subject, name='edit_subject'),
     path('upload/', StudentBulkUploadView.as_view(), name='student-upload'),
     path('downloadcsv/', downloadcsv, name='download-csv'),
+    path('downloadcv/', downloadcv, name='download-cv'),
+    path('<int:pk>/update/', StudentUpdateView.as_view(), name='student-update'),
 
     # Staff
     path("staff/home/", staff_views.staff_home, name='staff_home'),

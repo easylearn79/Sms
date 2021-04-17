@@ -49,10 +49,12 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     fees = models.CharField(max_length=300)
     matric_no = models.CharField(max_length=200)
+    phone_no = models.IntegerField()
     user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
     gender = models.CharField(max_length=1, choices=GENDER)
     profile_pic = models.ImageField(upload_to='profile_pics')
     address = models.TextField()
+    date_of_birth = models.DateField(default=timezone.now)
     fcm_token = models.TextField(default="")  # For firebase notifications
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -143,6 +145,11 @@ class StudentBulkUpload(models.Model):
     csv_file = models.FileField(upload_to='corecode/bulkupload/')
 
 
+class InvoiceBulkUpload(models.Model):
+    date_uploaded = models.DateTimeField(auto_now=True)
+    csv_file = models.FileField(upload_to='corecode/bulkupload/')
+
+
 class Invoice(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     session = models.ForeignKey(AcademicSession, on_delete=models.CASCADE)
@@ -204,6 +211,7 @@ class Receipt(models.Model):
     amount_paid = models.IntegerField()
     date_paid = models.DateField(default=timezone.now)
     comment = models.CharField(max_length=200, blank=True)
+    teller_no = models.IntegerField(unique=True)
     receipt_id = models.CharField(unique=True, max_length=6, null=True,
                                   blank=True, editable=False)
     qr_code = models.ImageField(upload_to="qr_code", blank=True)

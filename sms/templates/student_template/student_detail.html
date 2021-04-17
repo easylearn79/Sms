@@ -9,6 +9,9 @@
     <a href="{% url 'student-delete' object.id %}" class="btn btn-tool">
       <i class="fas fa-times"></i>
     </a>
+      <a href="{% url 'student-update' object.id %}" class="btn btn-tool">
+      <i class="fas fa-edit"></i>
+    </a>
   </div>
 </div>
 {% endblock content-header %}
@@ -47,10 +50,10 @@
 
           <div class="form-group border-bottom row">
             <label class="col">
-              Parent Mobile Number
+              Mobile Number
             </label>
             <div class="col">
-              {{ object.parent_mobile_number}}
+              {{ object.phone_no}}
             </div>
           </div>
 

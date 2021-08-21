@@ -47,14 +47,15 @@ class CustomUser(AbstractUser):
 
     username = None  # Removed username, using email instead
     email = models.EmailField(unique=True)
-    fees = models.CharField(max_length=300)
-    matric_no = models.CharField(max_length=200)
-    phone_no = models.IntegerField()
-    user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
+    surname = models.CharField(max_length=200)
+    firstname = models.CharField(max_length=200)
     gender = models.CharField(max_length=1, choices=GENDER)
-    profile_pic = models.ImageField(upload_to='profile_pics')
     address = models.TextField()
-    date_of_birth = models.DateField(default=timezone.now)
+    fees = models.CharField(max_length=300)
+    user_type = models.CharField(default=1, choices=USER_TYPE, max_length=1)
+    phone_no = models.CharField(max_length=13, blank=True)
+    profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics')
+    date_of_admission = models.DateField(default=timezone.now)
     fcm_token = models.TextField(default="")  # For firebase notifications
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -62,37 +63,32 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
     objects = CustomUserManager()
 
-    def __str__(self):
-        return f'{self.last_name} {self.first_name} ' \
-               f'({self.matric_no})'
-
 
 class Admin(models.Model):
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
 
-class Department(models.Model):
-    name = models.CharField(max_length=400)
+class Course(models.Model):
+    name = models.CharField(max_length=120)
+    dept_name = models.CharField(max_length=120)
     fees = models.CharField(max_length=300)
     collage = models.CharField(max_length=400)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
+
+
+class Department(models.Model):
+    dept_name = models.ForeignKey(Course, on_delete=models.DO_NOTHING)
+
+    def __str__(self):
+        return self.dept_name
 
 
 class Level(models.Model):
     name = models.CharField(max_length=400)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Course(models.Model):
-    name = models.CharField(max_length=120)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -125,24 +121,26 @@ class AcademicTerm(models.Model):
 
 
 class Student(models.Model):
-    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
+    matric_no = models.CharField(unique=True, max_length=200, null=True)
     surname = models.CharField(max_length=200)
     firstname = models.CharField(max_length=200)
     other_name = models.CharField(max_length=200, blank=True)
-    date_of_birth = models.DateField(default=timezone.now)
+    date_of_birth = models.DateField(default=timezone.now, null=True)
     course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True, blank=False)
     session = models.ForeignKey(AcademicSession, on_delete=models.DO_NOTHING, null=True)
-    dept = models.ForeignKey(Department, on_delete=models.DO_NOTHING, null=True, blank=False)
+    profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics', null=True)
     level = models.ForeignKey(Level, on_delete=models.DO_NOTHING, null=True, blank=False)
     term = models.ForeignKey(AcademicTerm, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
-        return f'{self.admin.last_name} {self.admin.first_name} ({self.admin.matric_no})'
+        return f'{self.surname} {self.firstname}'
 
 
 class StudentBulkUpload(models.Model):
     date_uploaded = models.DateTimeField(auto_now=True)
     csv_file = models.FileField(upload_to='corecode/bulkupload/')
+    objects = CustomUserManager()
 
 
 class InvoiceBulkUpload(models.Model):
@@ -151,12 +149,11 @@ class InvoiceBulkUpload(models.Model):
 
 
 class Invoice(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     session = models.ForeignKey(AcademicSession, on_delete=models.CASCADE)
     term = models.ForeignKey(AcademicTerm, on_delete=models.CASCADE)
-    dept_info = models.ForeignKey(Department, on_delete=models.CASCADE)
+    dept_info = models.ForeignKey(Course, on_delete=models.CASCADE)
     level_info = models.ForeignKey(Level, on_delete=models.CASCADE)
-
     balance_from_previous_term = models.IntegerField(default=0)
     invoice_id = models.CharField(unique=True, max_length=6, null=True,
                                   blank=True, editable=False)
@@ -164,7 +161,6 @@ class Invoice(models.Model):
         'active', 'Active'), ('closed', 'Closed')], default='active')
 
     class Meta:
-
         ordering = ['student', 'term', 'level_info']
 
     def __str__(self):
@@ -203,8 +199,8 @@ class InvoiceItem(models.Model):
 
 
 class Receipt(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    level = models.ForeignKey(Level, on_delete=models.DO_NOTHING)
     mode_of_payment = models.CharField(max_length=200)
     bank_name = models.CharField(max_length=200)
     branch = models.CharField(max_length=500)
@@ -238,24 +234,28 @@ class Receipt(models.Model):
 class Staff(models.Model):
     course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    surname = models.CharField(max_length=200)
+    firstname = models.CharField(max_length=200)
+    profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics')
 
     def __str__(self):
-        return self.admin.last_name + " " + self.admin.first_name
+        return self.admin.surname + " " + self.admin.firstname
 
 
 class Lecturer(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True, blank=False)
     admin = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.DO_NOTHING, null=True, blank=False)
+    profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics')
 
     def __str__(self):
-        return self.admin.last_name + " " + self.admin.first_name
+        return self.admin.surname + " " + self.admin.firstname
 
 
 class Subject(models.Model):
     name = models.CharField(max_length=120)
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, )
     lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, )
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -327,8 +327,6 @@ class NotificationStudent(models.Model):
 
 
 class StudentResult(models.Model):
-    dept_info = models.ForeignKey(Department, on_delete=models.CASCADE)
-    level_info = models.ForeignKey(Level, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     test = models.FloatField(default=0)

@@ -18,11 +18,15 @@
       <div class="col-sm-4">
         <div class="row mb-2">
           <div class="float-right">
-              <div class="logo"><img src="{{ object.profile_pic}}"  style="width: 134px; height:116px">
-              </div>
-            <h4>Name : {{object.first_name}}, {{ object.last_name}} </h4>
+              {% if object.profile_pic == ""  %}
+                <img src="{{ object.lecturer.profile_pic.url}}" style="width: 134px; height:116px">
+                {% else %}
+                    <div class="logo"><img src="{{ object.profile_pic.url}}"  style="width: 134px; height:116px">
+                    </div>
+              {% endif %}
+            <h4>Name : {{object.surname}}, {{ object.firstname}} </h4>
             <h4>Gender : {{ object.gender}} </h4>
-            <h4>Department : {{ object.dept.name}} </h4>
+            <h4>Department :{{ object.lecturer.course.dept_name}} </h4>
             <h4>Email : {{ object.email}}</h4>
             <h4>Course : {{ object.lecturer.course.name}}</h4>
           </div>
@@ -32,39 +36,27 @@
         <div>
           <div class="form-group border-bottom row">
             <label class="col">
-              Date of Birth
+              Mobile Number
             </label>
             <div class="col">
-              {{ object.date_of_birth }}
+              {{ object.phone_no}}
             </div>
           </div>
 
           <div class="form-group border-bottom row">
-            <label class="col">
-              Mobile Number
-            </label>
-            <div class="col">
-              {{ object.parent_mobile_number}}
-            </div>
-          </div>
-
-          <!-----
-            <div class="form-group border-bottom row">
             <label class="col">
               Address
             </label>
             <div class="col">
-              {{ object.address }}
+              {{ object.address}}
             </div>
           </div>
-            
-            ------>
           <div class="form-group border-bottom row">
             <label class="col">
-              Comments
+              Subject
             </label>
             <div class="col">
-              {{ object.others }}
+              {{ object.lecturer.subject.name }}
             </div>
           </div>
           <div class="form-group border-bottom row">
@@ -72,7 +64,7 @@
               Dept
             </label>
             <div class="col">
-              {{ object.student.dept.name}}
+              {{ object.lecturer.course.dept_name}}
             </div>
           </div>
 

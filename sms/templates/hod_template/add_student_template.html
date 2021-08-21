@@ -69,38 +69,6 @@
         })
     });
 </script>
-<script>
-    function validateMatric_No(matric_no) {
-        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(String(matric_no).toLowerCase());
-    }
-    $(document).ready(function(){
-        $("#id_matric_no").keyup(function(){
-            
-            var matric_no = $(this).val()
-            if (validateMatric_No(matric_no)){
-            $.ajax({
-                url: "{% url 'check_matric_no_availability' %}",
-                type: 'POST',
-                data:{matric_no:matric_no}
-            }).done(function(response){
-                if (response == "True"){
-                    $(".matric_no_error").remove()
-                    $("<span class='invalid matric_no_error'>Matric_NO Address Already Exist</span>").insertAfter("#id_matric_no");
-                }
-                else{
-                    $(".matric_no_error").remove()
-
-                    $("<span class='valid matric_no_error'>Matric_NO Address Available</span>").insertAfter("#id_matric_no");
-                }
-            }).fail(function(response){
-                $("<span class='alert alert-warning'>Server Could Not Process This</span>").insertAfter("#id_matric_no");
-            })
-        }
-        })
-    });
-</script>
-
 
 
 {% endblock custom_js %}

@@ -19,6 +19,9 @@
                                 <tr>
                                     <th>SN</th>
                                     <th>Course Name</th>
+                                    <th>Dept Name</th>
+                                    <th>Collage</th>
+                                    <th>Fee</th>
                                     <th>Edit</th>
                                 </tr>
                             </thead>
@@ -27,6 +30,9 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{course.name}}</td>
+                                    <td>{{course.dept_name}}</td>
+                                    <td>{{course.collage}}</td>
+                                    <td>{{course.fees}}</td>
                                     <td><a href="{% url 'edit_course' course.id %}" class="btn btn-primary">Edit</a></td>
                                 </tr>
                                 {% endfor %}

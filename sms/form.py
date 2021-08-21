@@ -16,10 +16,9 @@ class CustomUserForm(FormSettings):
     matric_no = forms.CharField(required=True)
     email = forms.EmailField(required=True)
     gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
-    date_of_birth = forms.CharField(required=True)
-    phone_no = forms.IntegerField()
+    surname = forms.CharField(required=True)
+    firstname = forms.CharField(required=True)
+    date_of_birth = forms.DateField()
     address = forms.CharField(widget=forms.Textarea)
     password = forms.CharField(widget=forms.PasswordInput)
     widget = {
@@ -55,20 +54,21 @@ class CustomUserForm(FormSettings):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'gender', 'phone_no', 'password', 'profile_pic', 'date_of_birth' ,'address']
+        fields = ['email', 'gender', 'password', 'date_of_birth',
+                  'address']
 
 
 class CustomUseForm(FormSettings):
     email = forms.EmailField(required=True)
     gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
+    surname = forms.CharField(required=True)
+    firstname = forms.CharField(required=True)
+    phone_no = forms.CharField()
     address = forms.CharField(widget=forms.Textarea)
     password = forms.CharField(widget=forms.PasswordInput)
     widget = {
         'password': forms.PasswordInput(),
     }
-    profile_pic = forms.ImageField()
 
     def __init__(self, *args, **kwargs):
         super(CustomUseForm, self).__init__(*args, **kwargs)
@@ -98,17 +98,7 @@ class CustomUseForm(FormSettings):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address']
-
-
-class StudentForm(CustomUserForm):
-    def __init__(self, *args, **kwargs):
-        super(StudentForm, self).__init__(*args, **kwargs)
-
-    class Meta(CustomUserForm.Meta):
-        model = Student
-        fields = CustomUserForm.Meta.fields + \
-                 ['course', 'session', 'dept', 'level', 'term']
+        fields = ['surname', 'firstname', 'email', 'gender', 'password', 'address']
 
 
 class AdminForm(CustomUserForm):
@@ -126,8 +116,9 @@ class StaffForm(CustomUseForm):
 
     class Meta:
         model = Staff
-        fields = CustomUseForm.Meta.fields + \
-                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address', 'course']
+        fields = ['surname', 'firstname'] + \
+            CustomUseForm.Meta.fields + \
+                 ['email', 'gender', 'password', 'profile_pic', 'phone_no', 'address']
 
 
 class LecturerForm(CustomUseForm):
@@ -136,8 +127,8 @@ class LecturerForm(CustomUseForm):
 
     class Meta:
         model = Lecturer
-        fields = CustomUseForm.Meta.fields + \
-                 ['course']
+        fields =CustomUseForm.Meta.fields + \
+                 ['profile_pic', 'course']
 
 
 class CourseForm(FormSettings):
@@ -145,8 +136,8 @@ class CourseForm(FormSettings):
         super(CourseForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        fields = ['name']
         model = Course
+        fields = ['name', 'dept_name', 'fees', 'collage']
 
 
 class DepartmentForm(FormSettings):
@@ -154,7 +145,7 @@ class DepartmentForm(FormSettings):
         super(DepartmentForm, self).__init__(*args, **kwargs)
 
     class Meta:
-        fields = ['name', 'fees', 'collage']
+        fields = ['dept_name']
         model = Department
 
 
@@ -174,7 +165,7 @@ class SubjectForm(FormSettings):
 
     class Meta:
         model = Subject
-        fields = ['name', 'staff', 'lecturer', 'course']
+        fields = ['name', 'lecturer', 'course', 'level']
 
 
 class StudentEditForm(CustomUseForm):
@@ -184,7 +175,7 @@ class StudentEditForm(CustomUseForm):
     class Meta:
         model = Student
         fields = CustomUseForm.Meta.fields + \
-                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address']
+                 ['surname', 'firstname', 'email', 'gender', 'password', 'profile_pic', 'address', 'matric_no', 'date_of_birth']
 
 
 class AcademicSessionForm(FormSettings):
@@ -256,17 +247,18 @@ class StaffEditForm(CustomUseForm):
     class Meta(CustomUseForm.Meta):
         model = Staff
         fields = CustomUseForm.Meta.fields + \
-                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address']
+                 ['email', 'gender', 'password', 'profile_pic', 'address']
 
 
 class LecturerEditForm(CustomUseForm):
     def __init__(self, *args, **kwargs):
         super(LecturerEditForm, self).__init__(*args, **kwargs)
+        super(LecturerEditForm, self).__init__(*args, **kwargs)
 
     class Meta(CustomUseForm.Meta):
         model = Lecturer
         fields = CustomUseForm.Meta.fields + \
-                 ['first_name', 'last_name', 'email', 'gender', 'password', 'profile_pic', 'address']
+                 ['email', 'gender', 'password', 'profile_pic', 'address']
 
 
 class EditResultForm(FormSettings):
@@ -292,7 +284,9 @@ InvoiceItemFormset = inlineformset_factory(
     Invoice, InvoiceItem, fields=['description', 'amount'], extra=1, can_delete=True)
 
 InvoiceReceiptFormSet = inlineformset_factory(
-    Invoice, Receipt, fields=('amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment'), extra=0,
+    Invoice, Receipt,
+    fields=('amount_paid', 'date_paid', 'comment', 'bank_name', 'level', 'branch', 'mode_of_payment', 'teller_no'),
+    extra=0,
     can_delete=True
 )
 

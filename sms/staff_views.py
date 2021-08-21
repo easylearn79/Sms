@@ -4,21 +4,19 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import (HttpResponseRedirect, get_object_or_404, redirect, render)
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from qr_code.qrcode.utils import ContactDetail, WifiConfig, Coordinates, QRCodeOptions
 
 from .forms import *
 from .models import *
 
-from .forms import InvoiceItemFormset, InvoiceReceiptFormSet, Invoices
-
+from .forms import InvoiceItemFormset, InvoiceReceiptFormSet
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views.generic import ListView, DetailView, DetailView
+from django.views.generic import ListView, DetailView
 from django.contrib.messages.views import SuccessMessageMixin
 
-from .forms import AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
+from .forms import AcademicTermForm, AcademicSessionForm, CurrentSessionForm
 
 
 class StaffListView(ListView):
@@ -28,28 +26,18 @@ class StaffListView(ListView):
 
 def staff_home(request):
     staff = get_object_or_404(Staff, admin=request.user)
-    total_students = Student.objects.filter(course=staff.course).count()
+    students = CustomUser.objects.all()
+    total_students = Student.objects.all().count()
     total_leave = LeaveReportStaff.objects.filter(staff=staff).count()
-    subjects = Subject.objects.filter(staff=staff)
-    total_subject = subjects.count()
     invoice = Invoice.objects.filter()
-    attendance_list = Attendance.objects.filter(subject__in=subjects)
-    total_attendance = attendance_list.count()
-    attendance_list = []
-    subject_list = []
-    for subject in subjects:
-        attendance_count = Attendance.objects.filter(subject=subject).count()
-        subject_list.append(subject.name)
-        attendance_list.append(attendance_count)
+    total_invoice = Invoice.objects.all().count()
     context = {
         'invoice': invoice,
+        'total_invoice': total_invoice,
         'page_title': 'Staff Panel - ' + str(staff.admin.last_name) + ' (' + str(staff.course) + ')',
         'total_students': total_students,
-        'total_attendance': total_attendance,
-        'total_leave': total_leave,
-        'total_subject': total_subject,
-        'subject_list': subject_list,
-        'attendance_list': attendance_list
+        'students': students,
+        'total_leave': total_leave
     }
     return render(request, 'staff_template/home_content.html', context)
 
@@ -237,9 +225,9 @@ def staff_view_profile(request):
                 gender = form.cleaned_data.get('gender')
                 passport = request.FILES.get('profile_pic') or None
                 admin = staff.admin
-                if password != None:
+                if password is not None:
                     admin.set_password(password)
-                if passport != None:
+                if passport is not None:
                     fs = FileSystemStorage()
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
@@ -340,7 +328,7 @@ class InvoiceCreateView(CreateView):
         context = self.get_context_data()
         formset = context['items']
         self.object = form.save()
-        if self.object.id != None:
+        if self.object.id is not None:
             if form.is_valid() and formset.is_valid():
                 formset.instance = self.object
                 formset.save()
@@ -395,7 +383,7 @@ class InvoiceDeleteView(DeleteView):
 
 class ReceiptCreateView(CreateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment', 'teller_no']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'level', 'mode_of_payment', 'teller_no']
     success_url = reverse_lazy('invoice-list')
     template_name = 'receipt_form.html'
 
@@ -417,6 +405,7 @@ class ReceiptUpdateView(UpdateView):
     model = Receipt
     fields = ['amount_paid', 'date_paid', 'comment']
     success_url = reverse_lazy('invoice-list')
+    template_name = 'receipt_form.html'
 
 
 class ReceiptDeleteView(DeleteView):

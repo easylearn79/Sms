@@ -29,20 +29,18 @@
                     <div class="card-header">
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
-                    
+
                     <!-- /.card-header -->
                     <div class="table-responsive">
                         <table id="invoicetable" class="table table-bordered table-hover">
                             <thead class="thead-light">
                                 <tr >
+                                    <p align="right"> <a href="#" class="btn btn-tool" style="color: #4CAF50;" onclick="window.print()" ><b>Print</b></a></p>
                                     <th>SN</th>
                                     <th>Full Name</th>
                                     <th>Matric_No</th>
                                     <th>Gender</th>
-                                    <th>Department</th>
-                                    <th>Phone No</th>
                                     <th>Level</th>
-                                    <th>Fees</th>
                                     <th>Email</th>
                                     <th>Course</th>
                                     <th>Avatar</th>
@@ -51,23 +49,20 @@
                             </thead>
                             <tbody>
                                 {% for student in students %}
-                                <tr class='clickable-row' data-href="{% url 'student-detail' student.id %}">
+                                <tr class='clickable-row' data-href="{% url 'student-detail' student.student.id %}">
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{ student.last_name}}, {{student.first_name}}</td>
-                                    <td>{{student.matric_no}}</td>
+                                    <td>{{ student.student.surname}},  {{student.student.other_name}}. {{student.student.firstname}}</td>
+                                    <td>{{student.student.matric_no}}</td>
                                     <td>{{ student.gender}}</td>
-                                    <td>{{ student.student.dept.name}}</td>
-                                <td>{{student.phone_no}}</td>
                                     <td>{{ student.student.level.name}}</td>
-                                    <td>{{ student.student.dept.fees  | intcomma }}</td>
                                     <td>{{ student.email}}</td>
                                     <td>{{ student.student.course.name}}</td>
-                                    
+
                                     <td>
                                         {% if student.profile_pic == ""  %}
-                                        No Image
+                                            <div class="logo"><img src="{{ student.student.profile_pic.url}}"  style="width: 134px; height:116px">
                                         {% else %}
-                                            <div class="logo"><img src="{{ student.profile_pic}}"  style="width: 134px; height:116px">
+                                            <div class="logo"><img src="{{ student.student.profile_pic.url}}"  style="width: 134px; height:116px">
                                             </div>
                                         {% endif %}
                                     </td>

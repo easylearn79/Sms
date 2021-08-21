@@ -2,7 +2,7 @@
 
 
 {% block title %}
-Upload School Bills from file
+Upload School Invoice from file
 {% endblock title %}
 
 
@@ -15,8 +15,7 @@ Upload School Bills from file
 
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {% include 'corecode/form_snippet.html' %}
-
+    {% include 'corecode/form.html' %}
     <input type="submit" class="btn btn-success" value="Submit">
   </form>
 {% endblock content %}

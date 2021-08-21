@@ -1,5 +1,7 @@
 {% extends 'main_app/base.html' %}
 {% load static %}
+{% load static %}
+{% load humanize %}
 {% block page_title %}{{page_title}}{% endblock page_title %}
 
 
@@ -28,7 +30,7 @@
                     <div class="card-header">
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
-                    
+
                     <!-- /.card-header -->
                     <div class="table-responsive">
                         <table id="invoicetable" class="table table-bordered table-hover">
@@ -51,13 +53,15 @@
                                 {% for student in students %}
                                 <tr class='clickable-row' data-href="{% url 'student-detail' student.id %}">
                                   <td>{{ forloop.counter}}</td>
-                                  <td>{{ student.surname}} {{student.firstname }} {{student.other_name }}</td>
-                                  <td>{{ student.registration_number}}</td>
-                                  <td>{{ student.gender}}</td>
-                                  <td>{{ student.dept}}</td>
-                                  <td>{{ student.level}}</td>
-                                  <td>{{ student.fees}}</td>
-                                  <td>{{ student.get_current_status_display}}</td>
+                                  <td>{{ student.last_name}}, {{student.first_name}}</td>
+                                    <td>{{student.matric_no}}</td>
+                                    <td>{{ student.gender}}</td>
+                                    <td>{{ student.student.dept.name}}</td>
+                                <td>{{student.phone_no}}</td>
+                                    <td>{{ student.student.level.name}}</td>
+                                    <td>{{ student.student.dept.fees  | intcomma }}</td>
+                                    <td>{{ student.email}}</td>
+                                    <td>{{ student.student.course.name}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

@@ -4,7 +4,6 @@
 {% load qr_code %}
 {% block page_title %}{{invoice}}{% endblock page_title %}
 
-<!DOCTYPE html>
 {% load static%}
 
 {% block content %}
@@ -37,22 +36,23 @@
       </div>
     </header>
 
-    <main class="col-sm-12" >
+    <main class="col-sm-18" >
       <div id="details" class="clearfix">
         <div id="client">
           <div class="to">INVOICE TO:</div>
-          <h2 class="name"><br>{{object}}</h2>
+          <h2 class="name"><br>{{object}}, {{object.student.matric_no}} </h2>
           <div class="name">Session : {{ object.session }}</div>
           <div class="email">Term: {{ object.term }} <a href="mailto:"></a></div>
             <div class="email">Gender : {{ request.user.gender}}<a href="mailto:"></a></div>
             <div class="name">Phone No : {{ request.user.phone_no }}</div>
-            <div class="name">Dept : {{ object.dept_info }}</div>
+            <div class="name">Course : {{ object.dept_info }}</div>
             <div class="name">Level : {{ object.level_info }}</div>
             <div class="name">Status: {{ object.get_status_display }}</div>
         </div>
         <div id="invoice">
           <h1>{{invoice_id}}</h1>
-            <div class="logo"><img src="{{ request.user.profile_pic}}"  style="width: 134px; height:116px"></div>        </div>
+                <div class="logo"><img src="{{ object.student.profile_pic.url}}"  style="width: 134px; height:116px"></div>
+        </div>
       </div>
       <table border="0" cellspacing="0" cellpadding="0">
         <thead>
@@ -60,8 +60,6 @@
             <th class="no">S/N</th>
             <th class="desc">DESCRIPTION</th>
             <th class="total">Amount</th>
-              <th class="qty">Unit</th>
-            <th class="total">TOTAL</th>
           </tr>
         </thead>
         <tbody>
@@ -69,46 +67,43 @@
           <tr>
             <td class="no">{{forloop.counter}}</td>
             <td class="desc">{{item.description}}</td>
-            <td class="total">#{{item.amount | intcomma }}</td>
-          <td class="desc">{{forloop.counter}}</td>
           <td class="total">#{{item.amount | intcomma}}</td>
 		  </tr>
         {% endfor %}
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2" >Total Amount this term</td>
-            <td>#{{ object.amount_payable | intcomma}}</td>
+            <td colspan="1"></td>
+            <td colspan="1" >Total Amount this term</td>
+            <td>{{ object.amount_payable | intcomma}}</td>
           </tr>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Balance from previous term</td>
+            <td colspan="1"></td>
+            <td colspan="1">Balance from previous term</td>
             <td>#{{ object.balance_from_previous_term | intcomma }}</td>
           </tr>
-
-          {% if total_amount_paid > amount_payable %}
-              <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Over Payment</td>
+          {% if object.total_amount_paid < object.amount_payable %}
+          <tr>
+            <td colspan="1"></td>
+            <td colspan="1">Under Payment</td>
             <td>#{{ object.balance | intcomma }}</td>
           </tr>
           {% else %}
-               <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Under Payment</td>
+          <tr>
+            <td colspan="1"></td>
+            <td colspan="1">Over Payment</td>
             <td>#{{ object.balance | intcomma }}</td>
           </tr>
-          {% endif %}
+          {%endif%}
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Total Amount Payable</td>
-            <td>#{{ object.total_amount_payable | intcomma}}</td>
+            <td colspan="1"></td>
+            <td colspan="1">Total Amount Payable</td>
+            <td>{{ object.total_amount_payable | intcomma}}</td>
           </tr>
           <tr>
-            <td colspan="2"></td>
-            <td colspan="2">Total Amount Paid</td>
-            <td>#{{ object.total_amount_paid | intcomma}}</td>
+            <td colspan="1"></td>
+            <td colspan="1">Total Amount Paid</td>
+            <td>{{ object.total_amount_paid | intcomma}}</td>
           </tr>
         </tfoot>
       </table>
@@ -123,6 +118,7 @@
                 <th>Mode_Of_Payment</th>
                 <th>Bank_Name</th>
                 <th>Branch</th>
+                <th>Teller No</th>
             </tr>
           </thead>
           <tbody>
@@ -135,6 +131,7 @@
                 <td>{{ receipt.mode_of_payment}}</td>
               <td>{{ receipt.bank_name}}</td>
               <td>{{ receipt.branch}}</td>
+            <td>{{ receipt.teller_no}}</td>
             </tr>
             {% endfor %}
           </tbody>

@@ -21,29 +21,30 @@
                                     <th>Full Name</th>
                                     <th>Email</th>
                                     <th>Gender</th>
-                                    <th>Course</th>
+                                    <th>Phone</th>
                                     <th>Avatar</th>
-                                    <th>Edit</th>
+                                   <!-- <th>Edit</th>--->
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for staff in allStaff %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{staff.last_name}}, {{staff.first_name}}</td>
+                                    <td>{{staff.staff.surname}}, {{staff.staff.firstname}}</td>
                                     <td>{{staff.email}}</td>
                                     <td>{{staff.gender}}</td>
-                                    <td>{{staff.staff.course.name}}</td>
+                                    <td>{{ object.phone_no}}</td>
                                     <td>
-                                        {% if staff.profile_pic == ""  %}
-                                        No Image
+                                        {% if staff.profile_pic  == ""  %}
+                                        <div class="logo"><img src="{{staff.profile_pic.url}}"  style="width: 134px; height:116px">
                                         {% else %}
                                         <img class="img img-fluid mb-2" height="100" width="100"
-                                            src="{{staff.profile_pic}}" alt="">
+                                            src="{{staff.staff.profile_pic.url }}" alt="img">
                                         {% endif %}
                                     </td>
-                                    <td><a href="
-                                        {% url 'edit_staff' staff.staff.id %}" class="btn btn-primary">Edit</a></td>
+
+                                   <!----- <td><a href="
+                                      {% url 'edit_staff' staff.id %}" class="btn btn-primary">Edit</a></td> --->
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -55,3 +56,10 @@
     </div>
 </section>
 {% endblock content %}
+{% block morejs %}
+<script>
+  $('#invoicetable').DataTable({
+  });
+</script>
+
+{% endblock morejs %}

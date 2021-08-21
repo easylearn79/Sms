@@ -7,7 +7,7 @@
   {% csrf_token %}
 
   <div class="alert">
-    <p>Are you sure you want to delete "{{ object }}"?</p>
+    <p>Are you sure you want to delete "{{ object.student.surname }}, {{ object.student.firstname }}"?</p>
     <p>All contents attached to this student will be deleted</p>
   </div>
 

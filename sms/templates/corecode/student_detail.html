@@ -18,12 +18,12 @@
         <div class="row mb-2">
           <div class="float-right">
               <div class="card mb-3 box-shadow">
-                <img src="{{ object.profile_pic}}" class="card-img-top" alt="User Image">
+                <img src="{{ object.student.profile_pic.url}}" class="card-img-top" alt="User Image">
               </div>
-            <h4>Name : {{ object.last_name}}, {{object.first_name}} </h4>
+            <h4>Name : {{ object.surname}}, {{object.student.student.firstname}} </h4>
             <h4>Matric_NO : {{object.matric_no}} </h4>
             <h4>Gender : {{ object.gender}} </h4>
-            <h4>Department : {{ object.student.dept.name}} </h4>
+            <h4>Department : {{ object.students.dept.name}} </h4>
             <h4>Level : {{ object.student.level}}</h4>
             <h4>Fees : {{ object.student.dept.fees}}</h4>
             <h4>Email : {{ object.email}}</h4>

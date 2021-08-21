@@ -31,8 +31,8 @@
         {% for result in results %}
         <tr>
             <td>{{forloop.counter}}</td>
-            <td>{{ result.dept_info }}</td>
-            <td>{{ result.level_info }}</td>
+            <td>{{ result.student.course.dept_name }}</td>
+            <td>{{ result.student.level }}</td>
             <td>{{ result.subject }}</td>
             <td>{{ result.test }}</td>
             <td>{{ result.exam }}</td>

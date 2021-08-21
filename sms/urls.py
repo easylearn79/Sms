@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.urls import path
 from .staff_views import InvoiceCreateView, InvoiceListView, InvoiceDeleteView, InvoiceDetailView, InvoiceUpdateView, \
-    ReceiptCreateView, ReceiptUpdateView,StudentUpdateView
-from .hod_views import StudentDetailView, StudentDeleteView, LecturerDeleteView, LecturerDetailView, \
-    StudentBulkUploadView, downloadcsv, downloadcv
+    ReceiptCreateView, ReceiptUpdateView, StudentUpdateView
+from .hod_views import StudentDetailView, StudentDeleteView, LecturerDeleteView, LecturerDetailView, StaffDeleteView, \
+    StudentBulkUploadView, downloadcsv, downloadcv, InvoiceBulkUpload, StaffDetailView
 from sms.EditResultView import EditResultView
 from .student_views import InvoiceDetailVie, student_list
+
 from . import hod_views, staff_views, student_views, views, lecturer_views
 
 urlpatterns = [
@@ -27,7 +28,8 @@ urlpatterns = [
     path('delete/<int:pk>/', StudentDeleteView.as_view(), name='student-delete'),
     path('<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
     path('<int:pk>/delete/', LecturerDeleteView.as_view(), name='lecturer_delete'),
-    path('<int:pk>/detailss/', LecturerDetailView.as_view(), name='detail'),
+    path('<int:pk>/delet/', StaffDeleteView.as_view(), name='staff_delete'),
+    path('<int:pk>/dd/', LecturerDetailView.as_view(), name='lecturer_detail'),
     path("get_attendance", views.get_attendance, name='get_attendance'),
     path("firebase-messaging-sw.js", views.showFirebaseJS, name='showFirebaseJS'),
     path("doLogin/", views.doLogin, name='user_login'),
@@ -62,6 +64,7 @@ urlpatterns = [
     path("dept/edit/<int:dept_id>", hod_views.edit_dept, name='edit_dept'),
     path("subject/edit/<int:subject_id>", hod_views.edit_subject, name='edit_subject'),
     path('upload/', StudentBulkUploadView.as_view(), name='student-upload'),
+    path('uploads/', InvoiceBulkUpload.as_view(), name='invoice-upload'),
     path('downloadcsv/', downloadcsv, name='download-csv'),
     path('downloadcv/', downloadcv, name='download-cv'),
     path('<int:pk>/update/', StudentUpdateView.as_view(), name='student-update'),
@@ -71,6 +74,7 @@ urlpatterns = [
     path("staff/get_students/", staff_views.get_students, name='get_students'),
     path("staff/attendance/fetch/", staff_views.get_student_attendance, name='get_student_attendance'),
     path("staff/attendance/take/", staff_views.staff_take_attendance, name='staff_take_attendance'),
+    path('<int:pk>/d/', StaffDetailView.as_view(), name='staff_detail'),
     path("staff/payment/confirm/", staff_views.staff_confirm_payment, name='staff_comfirm_payment'),
     path("staff/attendance/update/", staff_views.staff_update_attendance, name='staff_update_attendance'),
     path("staff/fcmtoken/", staff_views.staff_fcmtoken, name='staff_fcmtoken'),
@@ -83,7 +87,7 @@ urlpatterns = [
 
     path('create/', InvoiceCreateView.as_view(), name='invoice-create'),
     path('<int:pk>/detail/', InvoiceDetailView.as_view(), name='invoice-detail'),
-    path('<int:pk>/update/', InvoiceUpdateView.as_view(), name='invoice-update'),
+    path('invoice/<int:pk>/update/', InvoiceUpdateView.as_view(), name='invoice-update'),
     path('<int:pk>/inviolate/', InvoiceDeleteView.as_view(), name='inviolate'),
     path('receipt/create', ReceiptCreateView.as_view(), name='receipt-create'),
     path('receipt/<int:pk>/update/', ReceiptUpdateView.as_view(), name='receipt-update'),
@@ -116,8 +120,6 @@ urlpatterns = [
     path('lecturer/result/fetch/', lecturer_views.fetch_student_result, name='fetch_student_result'),
     path("lecturer/result/edit/", EditResultView.as_view(), name='edit_student_result'),
     path("lecturer/result/add/", lecturer_views.lecturer_add_result, name='lecturer_add_result'),
-    path('bulk-invoice/', hod_views.bulk_invoice, name='bulk-invoice'),
-
     # Student
     path('list', student_list, name='student-list'),
     path("student/view/profile/", student_views.student_view_profile, name='student_view_profile'),
@@ -125,6 +127,7 @@ urlpatterns = [
     path("student/home/", student_views.student_home, name='student_home'),
     path("student/view/attendance/", student_views.student_view_attendance, name='student_view_attendance'),
     path('student/view/result/', student_views.student_view_result, name='student_view_result'),
+    path("student/teller/confirm/", student_views.student_teller, name='student_teller'),
     path('student/view/receipt/', student_views.student_view_receipt, name='student_view_receipt'),
     path('student/view/invoice/', student_views.student_view_invoice, name='student_view_invoice'),
     path('<int:pk>/details/', InvoiceDetailVie.as_view(), name='invoice-details'),

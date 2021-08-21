@@ -20,14 +20,51 @@ from django.contrib.messages.views import SuccessMessageMixin
 
 from .forms import AcademicTermForm, AcademicSessionForm, SubjectForm, CurrentSessionForm
 
+from django.contrib.messages.views import SuccessMessageMixin
 
-def manage_student(request):
-    students = CustomUser.objects.filter(user_type=3)
-    context = {
-        'students': students,
-        'page_title': 'Manage Students'
-    }
-    return render(request, "hod_template/manage_student.html", context)
+
+def student_list(request):
+    students = Student.objects.all()
+    return render(request, 'corecode/student_list.html', {"students": students})
+
+
+class StudentBulkUploadView(SuccessMessageMixin, CreateView):
+    model = StudentBulkUpload
+    template_name = 'corecode/students_upload.html'
+    fields = ['csv_file']
+    success_url = '/student/manage'
+    success_message = 'Successfully uploaded students'
+
+
+def downloadcsv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="studentUser.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['matric_no', 'surname',
+                     'firstname', 'other_name', 'address', 'date_of_birth', 'course',
+                     'session', 'level', 'term'])
+
+    return response
+
+
+class InvoiceBulkUpload(CreateView, SuccessMessageMixin):
+    model = InvoiceBulkUpload
+    template_name = 'corecode/bulk_invoice.html'
+    fields = ['csv_file']
+    success_url = reverse_lazy('invoice-list')
+    success_message = 'Successfully uploaded Invoice'
+
+
+def downloadcv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="student_invoice.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['student', 'session', 'term',
+                     'dept_info', 'level_info'])
+
+    return response
 
 
 def error_404_view(request):
@@ -48,6 +85,21 @@ class StudentDeleteView(DeleteView):
     model = CustomUser
     success_url = reverse_lazy('manage_student')
     template_name = "corecode/student_confirm_delete.html"
+
+
+class StaffDetailView(DetailView):
+    model = Staff
+    template_name = "staff_template/staff_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(StaffDetailView, self).get_context_data(**kwargs)
+        return context
+
+
+class StaffDeleteView(DeleteView):
+    model = Staff
+    success_url = reverse_lazy('manage_staff')
+    template_name = "staff_template/staff_confirm_delete.html"
 
 
 class LecturerDetailView(DetailView):
@@ -71,7 +123,83 @@ class StudentDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentDetailView, self).get_context_data(**kwargs)
+        context['payments'] = Invoice.objects.filter()
         return context
+
+
+def manage_student(request):
+    students = CustomUser.objects.filter(user_type=3)
+    context = {
+        'students': students,
+        'page_title': 'Manage Students'
+    }
+    return render(request, "hod_template/manage_student.html", context)
+
+
+def manage_staff(request):
+    allStaff = CustomUser.objects.filter(user_type=2)
+    context = {
+        'allStaff': allStaff,
+        'page_title': 'Manage Staff'
+    }
+    return render(request, "hod_template/manage_staff.html", context)
+
+
+def manage_lecturer(request):
+    allLecturer = CustomUser.objects.filter(user_type=4)
+    context = {
+        'allLecturer': allLecturer,
+        'page_title': 'Manage Lecturer'
+    }
+    return render(request, "hod_template/manage_lecturer.html", context)
+
+
+def manage_course(request):
+    courses = Course.objects.all()
+    context = {
+        'courses': courses,
+        'page_title': 'Manage Courses'
+    }
+    return render(request, "hod_template/manage_course.html", context)
+
+
+def manage_dept(request):
+    depts = Department.objects.all()
+    context = {
+        'depts': depts,
+        'page_title': 'Manage Department'
+    }
+    return render(request, "hod_template/manage_dept.html", context)
+
+
+def manage_level(request):
+    levels = Level.objects.all()
+    context = {
+        'levels': levels,
+        'page_title': 'Manage Level'
+    }
+    return render(request, "hod_template/manage_level.html", context)
+
+
+def manage_subject(request):
+    subjects = Subject.objects.all()
+    context = {
+        'subjects': subjects,
+        'page_title': 'Manage Subjects'
+    }
+    return render(request, "hod_template/manage_subject.html", context)
+
+
+def manage_session(request):
+    sessions = AcademicSession.objects.all()
+    context = {'sessions': sessions, 'page_title': 'Manage Sessions'}
+    return render(request, "hod_template/manage_session.html", context)
+
+
+def manage_term(request):
+    terms = AcademicTerm.objects.all()
+    context = {'terms': terms, 'page_title': 'Manage Term'}
+    return render(request, "hod_template/manage_term.html", context)
 
 
 def admin_home(request):
@@ -110,24 +238,24 @@ def add_staff(request):
     context = {'form': form, 'page_title': 'Add Staff'}
     if request.method == 'POST':
         if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
+            surname = form.cleaned_data.get('surname')
+            firstname = form.cleaned_data.get('firstname')
             address = form.cleaned_data.get('address')
             email = form.cleaned_data.get('email')
+            phone_no = form.cleaned_data.get('phone_no')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password')
             course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic')
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
+            profile_pic = request.FILES.get('profile_pic')
             try:
-                user = CustomUser.objects.create_user(email=email, password=password, user_type=2,
-                                                      first_name=first_name, last_name=last_name,
-                                                      profile_pic=passport_url)
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=2)
+                user.staff.surname = surname
+                user.staff.firstname = firstname
                 user.gender = gender
                 user.address = address
+                user.phone_no = phone_no
                 user.staff.course = course
+                user.staff.profile_pic = profile_pic
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_staff'))
@@ -145,24 +273,24 @@ def add_lecturer(request):
     context = {'form': form, 'page_title': 'Add Lecturer'}
     if request.method == 'POST':
         if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
+            surname = form.cleaned_data.get('surname')
+            firstname = form.cleaned_data.get('firstname')
             address = form.cleaned_data.get('address')
             email = form.cleaned_data.get('email')
+            phone_no = form.cleaned_data.get('phone_no')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password')
             course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic')
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
+            profile_pic = request.FILES.get('profile_pic')
             try:
                 user = CustomUser.objects.create_user(email=email, password=password, user_type=4,
-                                                      first_name=first_name, last_name=last_name,
-                                                      profile_pic=passport_url)
+                                                      surname=surname, firstname=firstname
+                                                      )
                 user.gender = gender
                 user.address = address
+                user.phone_no = phone_no
                 user.lecturer.course = course
+                user.profile_pic = profile_pic
                 user.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_lecturer'))
@@ -180,33 +308,34 @@ def add_student(request):
     context = {'form': forms, 'page_title': 'Add Student'}
     if request.method == 'POST':
         if forms.is_valid():
-            first_name = forms.cleaned_data.get('first_name')
-            last_name = forms.cleaned_data.get('last_name')
+            surname = forms.cleaned_data.get('surname')
+            firstname = forms.cleaned_data.get('firstname')
+            other_name = forms.cleaned_data.get('other_name')
             matric_no = forms.cleaned_data.get('matric_no')
-            phone_no = forms.cleaned_data.get('phone_no')
             address = forms.cleaned_data.get('address')
             email = forms.cleaned_data.get('email')
             gender = forms.cleaned_data.get('gender')
+            date_of_birth = forms.cleaned_data.get('date_of_birth')
             password = forms.cleaned_data.get('password')
-            dept = forms.cleaned_data.get('dept')
+            phone_no = forms.cleaned_data.get('phone_no')
             course = forms.cleaned_data.get('course')
             session = forms.cleaned_data.get('session')
             term = forms.cleaned_data.get('term')
             level = forms.cleaned_data.get('level')
-            passport = request.FILES['profile_pic']
-            fs = FileSystemStorage()
-            filename = fs.save(passport.name, passport)
-            passport_url = fs.url(filename)
+            profile_pic = request.FILES.get('profile_pic')
             try:
-                user = CustomUser.objects.create_user(email=email, password=password, user_type=3,
-                                                      first_name=first_name, matric_no=matric_no, last_name=last_name,
-                                                      profile_pic=passport_url, phone_no=phone_no)
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=3)
                 user.gender = gender
-                user.phone_no = phone_no
                 user.address = address
+                user.phone_no = phone_no
+                user.student.date_of_birth = date_of_birth
                 user.student.session = session
+                user.student.profile_pic = profile_pic
                 user.student.course = course
-                user.student.dept = dept
+                user.student.surname = surname
+                user.student.firstname = firstname
+                user.student.other_name = other_name
+                user.student.matric_no = matric_no
                 user.student.level = level
                 user.student.term = term
                 user.level = level
@@ -228,14 +357,10 @@ def add_dept(request):
     }
     if request.method == 'POST':
         if form.is_valid():
-            name = form.cleaned_data.get('name')
-            fees = form.cleaned_data.get('fees')
-            collage = form.cleaned_data.get('collage')
+            dept_name = form.cleaned_data.get('dept_name')
             try:
                 dept = Department()
-                dept.name = name
-                dept.fees = fees
-                dept.collage = collage
+                dept.dept_name = dept_name
                 dept.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_dept'))
@@ -305,13 +430,15 @@ def add_course(request):
     if request.method == 'POST':
         if form.is_valid():
             name = form.cleaned_data.get('name')
-            dept_info = form.cleaned_data.get('dept_info')
-            level_info = form.cleaned_data.get('level_info')
+            dept_name = form.cleaned_data.get('dept_name')
+            fees = form.cleaned_data.get('fees')
+            collage = form.cleaned_data.get('collage')
             try:
                 course = Course()
                 course.name = name
-                course.dept_info = dept_info
-                course.level_info = level_info
+                course.dept_name = dept_name
+                course.fees = fees
+                course.collage = collage
                 course.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_course'))
@@ -332,14 +459,14 @@ def add_subject(request):
         if form.is_valid():
             name = form.cleaned_data.get('name')
             course = form.cleaned_data.get('course')
-            staff = form.cleaned_data.get('staff')
             lecturer = form.cleaned_data.get('lecturer')
+            level = form.cleaned_data.get('level')
             try:
                 subject = Subject()
                 subject.name = name
-                subject.staff = staff
                 subject.lecturer = lecturer
                 subject.course = course
+                subject.level = level
                 subject.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_subject'))
@@ -350,60 +477,6 @@ def add_subject(request):
             messages.error(request, "Fill Form Properly")
 
     return render(request, 'hod_template/add_subject_template.html', context)
-
-
-def manage_staff(request):
-    allStaff = CustomUser.objects.filter(user_type=2)
-    context = {
-        'allStaff': allStaff,
-        'page_title': 'Manage Staff'
-    }
-    return render(request, "hod_template/manage_staff.html", context)
-
-
-def manage_lecturer(request):
-    allLecturer = CustomUser.objects.filter(user_type=4)
-    context = {
-        'allLecturer': allLecturer,
-        'page_title': 'Manage Lecturer'
-    }
-    return render(request, "hod_template/manage_lecturer.html", context)
-
-
-def manage_course(request):
-    courses = Course.objects.all()
-    context = {
-        'courses': courses,
-        'page_title': 'Manage Courses'
-    }
-    return render(request, "hod_template/manage_course.html", context)
-
-
-def manage_dept(request):
-    depts = Department.objects.all()
-    context = {
-        'depts': depts,
-        'page_title': 'Manage Department'
-    }
-    return render(request, "hod_template/manage_dept.html", context)
-
-
-def manage_level(request):
-    levels = Level.objects.all()
-    context = {
-        'levels': levels,
-        'page_title': 'Manage Level'
-    }
-    return render(request, "hod_template/manage_level.html", context)
-
-
-def manage_subject(request):
-    subjects = Subject.objects.all()
-    context = {
-        'subjects': subjects,
-        'page_title': 'Manage Subjects'
-    }
-    return render(request, "hod_template/manage_subject.html", context)
 
 
 def edit_staff(request, staff_id):
@@ -421,26 +494,29 @@ def edit_staff(request, staff_id):
             address = form.cleaned_data.get('address')
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
+            phone_no = form.cleaned_data.get('phone_no')
             gender = form.cleaned_data.get('gender')
             password = form.cleaned_data.get('password') or None
             course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic') or None
+            profile_pic = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=staff.admin.id)
                 user.username = username
                 user.email = email
                 if password is not None:
                     user.set_password(password)
-                if passport is not None:
+                if profile_pic is not None:
                     fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
+                    filename = fs.save(profile_pic.name, profile_pic)
                     passport_url = fs.url(filename)
                     user.profile_pic = passport_url
                 user.first_name = first_name
                 user.last_name = last_name
+                user.phone_no = phone_no
                 user.gender = gender
                 user.address = address
                 staff.course = course
+                user.profile_pic = profile_pic
                 user.save()
                 staff.save()
                 messages.success(request, "Successfully Updated")
@@ -457,7 +533,7 @@ def edit_staff(request, staff_id):
 
 def edit_lecturer(request, lecturer_id):
     lecturer = get_object_or_404(Lecturer, id=lecturer_id)
-    form = LecturerForm(request.POST or None, instance=lecturer)
+    form = LecturerForm(request.POST, instance=lecturer)
     context = {
         'form': form,
         'lecturer_id': lecturer_id,
@@ -471,24 +547,27 @@ def edit_lecturer(request, lecturer_id):
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
+            phone_no = form.cleaned_data.get('phone_no')
             password = form.cleaned_data.get('password') or None
             course = form.cleaned_data.get('course')
-            passport = request.FILES.get('profile_pic') or None
+            profile_pic = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=lecturer.admin.id)
                 user.username = username
                 user.email = email
                 if password is not None:
                     user.set_password(password)
-                if passport is not None:
+                if profile_pic is not None:
                     fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
+                    filename = fs.save(profile_pic.name, profile_pic)
                     passport_url = fs.url(filename)
                     user.profile_pic = passport_url
                 user.first_name = first_name
                 user.last_name = last_name
+                user.phone_no = phone_no
                 user.gender = gender
                 user.address = address
+                user.student.profile_pic = profile_pic
                 lecturer.course = course
                 user.save()
                 lecturer.save()
@@ -514,34 +593,34 @@ def edit_student(request, student_id):
     }
     if request.method == 'POST':
         if form.is_valid():
-            first_name = form.cleaned_data.get('first_name')
-            last_name = form.cleaned_data.get('last_name')
+            surname = form.cleaned_data.get('surname')
+            firstname = form.cleaned_data.get('firstname')
+            other_name = form.cleaned_data.get('other_name')
             address = form.cleaned_data.get('address')
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             gender = form.cleaned_data.get('gender')
             phone_no = form.cleaned_data.get('phone_no')
+            date_of_birth = form.cleaned_data.get('date_of_birth')
             password = form.cleaned_data.get('password') or None
             course = form.cleaned_data.get('course')
             session = form.cleaned_data.get('session')
-            passport = request.FILES.get('profile_pic') or None
+            profile_pic = request.FILES.get('profile_pic') or None
             try:
                 user = CustomUser.objects.get(id=student.admin.id)
-                if passport != None:
-                    fs = FileSystemStorage()
-                    filename = fs.save(passport.name, passport)
-                    passport_url = fs.url(filename)
-                    user.profile_pic = passport_url
                 user.username = username
                 user.email = email
-                if password != None:
+                if password is not None:
                     user.set_password(password)
-                user.first_name = first_name
-                user.last_name = last_name
+                user.student.surname = surname
+                user.student.firstname = firstname
+                user.student.date_of_birth = date_of_birth
                 student.session = session
                 user.gender = gender
                 user.phone_no = phone_no
                 user.address = address
+                user.student.profile_pic = profile_pic
+                user.student.other_name = other_name
                 student.course = course
                 user.save()
                 student.save()
@@ -551,8 +630,8 @@ def edit_student(request, student_id):
                 messages.error(request, "Could Not Update " + str(e))
         else:
             messages.error(request, "Please Fill Form Properly!")
-    else:
-        return render(request, "hod_template/edit_student_template.html", context)
+
+    return render(request, "hod_template/edit_student_template.html", context)
 
 
 def edit_course(request, course_id):
@@ -566,9 +645,15 @@ def edit_course(request, course_id):
     if request.method == 'POST':
         if form.is_valid():
             name = form.cleaned_data.get('name')
+            dept_name = form.cleaned_data.get('dept_name')
+            fees = form.cleaned_data.get('fees')
+            collage = form.cleaned_data.get('collage')
             try:
                 course = Course.objects.get(id=course_id)
                 course.name = name
+                course.dept_name = dept_name
+                course.fees = fees
+                course.collage = collage
                 course.save()
                 messages.success(request, "Successfully Updated")
             except:
@@ -593,6 +678,7 @@ def edit_subject(request, subject_id):
             course = form.cleaned_data.get('course')
             staff = form.cleaned_data.get('staff')
             lecturer = form.cleaned_data.get('lecturer')
+            level = form.cleaned_data.get('level')
 
             try:
                 subject = Subject.objects.get(id=subject_id)
@@ -600,6 +686,7 @@ def edit_subject(request, subject_id):
                 subject.staff = staff
                 subject.lecturer = lecturer
                 subject.course = course
+                subject.level = level
                 subject.save()
                 messages.success(request, "Successfully Updated")
                 return redirect(reverse('edit_subject', args=[subject_id]))
@@ -626,12 +713,6 @@ def add_session(request):
     return render(request, "hod_template/add_session_template.html", context)
 
 
-def manage_session(request):
-    sessions = AcademicSession.objects.all()
-    context = {'sessions': sessions, 'page_title': 'Manage Sessions'}
-    return render(request, "hod_template/manage_session.html", context)
-
-
 def add_term(request):
     form = AcademicTermForm(request.POST or None)
     context = {'form': form, 'page_title': 'Add Term'}
@@ -646,12 +727,6 @@ def add_term(request):
         else:
             messages.error(request, 'Fill Form Properly ')
     return render(request, "hod_template/add_term.html", context)
-
-
-def manage_term(request):
-    terms = AcademicTerm.objects.all()
-    context = {'terms': terms, 'page_title': 'Manage Term'}
-    return render(request, "hod_template/manage_term.html", context)
 
 
 def edit_term(request, term_id):
@@ -778,7 +853,7 @@ def view_staff_leave(request):
     else:
         id = request.POST.get('id')
         status = request.POST.get('status')
-        if (status == '1'):
+        if status == '1':
             status = 1
         else:
             status = -1
@@ -803,7 +878,7 @@ def view_student_leave(request):
     else:
         id = request.POST.get('id')
         status = request.POST.get('status')
-        if (status == '1'):
+        if status == '1':
             status = 1
         else:
             status = -1
@@ -960,7 +1035,7 @@ def send_staff_notification(request):
 
 class ReceiptCreateView(CreateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment', 'receipt_id']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'level', 'branch', 'mode_of_payment', 'receipt_id']
     success_url = 'list'
     template_name = 'hod_template/receipt_form.html'
 
@@ -980,7 +1055,7 @@ class ReceiptCreateView(CreateView):
 
 class ReceiptUpdateView(UpdateView):
     model = Receipt
-    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'branch', 'mode_of_payment']
+    fields = ['amount_paid', 'date_paid', 'comment', 'bank_name', 'level', 'branch', 'mode_of_payment']
     success_url = reverse_lazy('invoice-list')
 
 
@@ -1109,45 +1184,3 @@ def current_session_view(request):
             })
 
         return render(request, 'corecode/current_session.html', {"form": form})
-
-
-def bulk_invoice(request):
-    return render(request, 'corecode/bulk_invoice.html')
-
-
-class StudentBulkUploadView(CreateView):
-    model = StudentBulkUpload
-    template_name = 'corecode/students_upload.html'
-    fields = ['csv_file']
-    success_url = reverse_lazy('manage_student')
-    success_message = 'Successfully uploaded students'
-
-
-def downloadcsv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="student_template.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(['matric_no', 'surname',
-                     'firstname', 'email', 'phone_no', 'gender', 'created_at', 'address'])
-
-    return response
-
-
-class InvoiceBulkUpload(CreateView):
-    model = InvoiceBulkUpload
-    template_name = 'corecode/bulk_invoice.html'
-    fields = ['csv_file']
-    success_url = reverse_lazy('invoice-list')
-    success_message = 'Successfully uploaded Invoice'
-
-
-def downloadcv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="student_invoice.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(['student', 'session',
-                     'term', 'dept_info', 'level_info'])
-
-    return response

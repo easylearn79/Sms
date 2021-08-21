@@ -78,7 +78,7 @@ def get_students(request):
         for student in students:
             data = {
                 "id": student.id,
-                "name": student.admin.last_name + " " + student.admin.first_name
+                "name": student.surname + " " + student.firstname
             }
             student_data.append(data)
         return JsonResponse(json.dumps(student_data), content_type='application/json', safe=False)
@@ -231,12 +231,12 @@ def lecturer_add_result(request):
             student = get_object_or_404(Student, id=student_id)
             subject = get_object_or_404(Subject, id=subject_id)
             try:
-                data = StudentResult.objects.get(
-                    student=student, subject=subject)
+                data = StudentResult.objects.get(student=student, subject=subject)
                 data.exam = exam
                 data.test = test
                 data.save()
                 messages.success(request, "Scores Updated")
+
             except:
                 result = StudentResult(student=student, subject=subject, test=test, exam=exam)
                 result.save()

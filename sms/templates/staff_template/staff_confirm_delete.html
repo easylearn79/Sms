@@ -1,0 +1,18 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+
+  <div class="alert">
+    <p>Are you sure you want to delete "{{ staff.surname }}, {{ staff.firstname }}"?</p>
+    <p>All contents attached to this Staff will be deleted</p>
+  </div>
+
+  <input type="submit" class="btn btn-primary" value="Confirm">
+
+</form>
+
+
+{% endblock content %}

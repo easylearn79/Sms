@@ -5,33 +5,34 @@
 {% block content-header %}
 <div class="card-header">
   <div class="card-tools">
-    <a href="#" class="btn btn-tool">Print</a>
+    <a href="#" class="btn btn-tool" style="color: #4CAF50;" onclick="window.print()">Print</a>
     <a href="{% url 'student-delete' object.id %}" class="btn btn-tool">
       <i class="fas fa-times"></i>
     </a>
-      <a href="{% url 'student-update' object.id %}" class="btn btn-tool">
-      <i class="fas fa-edit"></i>
     </a>
   </div>
 </div>
 {% endblock content-header %}
 
-{% block content %}
+{%block content %}
     <div class="row mb-4">
       <div class="col-sm-4">
         <div class="row mb-2">
           <div class="float-right">
-              <div id="logo">
-          <div class="logo"><img src="{{ object.profile_pic}}"  style="width: 134px; height:116px">
-          </div>
+              <div id="logo" >
+              {% if object.student.profile_pic == ""  %}
+                <img src="{{object.student.profile_pic.url}}" style="width: 134px; height:116px">
+                {% else %}
+                    <div class="logo"><img src="{{object.student.profile_pic.url}}"  style="width: 134px; height:116px">
+                    </div>
+              {% endif %}
             </div>
-
-            <h4>Name : {{ object.last_name}}, {{object.first_name}} </h4>
-            <h4>Matric_NO : {{object.matric_no}} </h4>
-            <h4>Gender : {{ object.gender}} </h4>
-            <h4>Department : {{ object.student.dept.name}} </h4>
-            <h4>Level : {{ object.student.level}}</h4>
-            <h4>Fees : {{ object.student.dept.fees  | intcomma }}</h4>
+            <h4>Name : {{object.student.surname}}, {{object.student.firstname}} </h4>
+            <h4>Matric_NO : {{object.student.matric_no}} </h4>
+            <h4>Gender : {{object.gender}} </h4>
+            <h4>Department : {{object.student.course.dept_name}} </h4>
+            <h4>Level : {{object.student.level}}</h4>
+            <h4>Fees : {{ object.student.course.fees  | intcomma }}</h4>
             <h4>Email : {{ object.email}}</h4>
             <h4>Course : {{ object.student.course.name}}</h4>
           </div>
@@ -44,7 +45,7 @@
               Date of Birth
             </label>
             <div class="col">
-              {{ object.date_of_birth }}
+              {{object.student.date_of_birth }}
             </div>
           </div>
 
@@ -57,7 +58,6 @@
             </div>
           </div>
 
-          <!-----
             <div class="form-group border-bottom row">
             <label class="col">
               Address
@@ -66,22 +66,12 @@
               {{ object.address }}
             </div>
           </div>
-            
-            ------>
-          <div class="form-group border-bottom row">
-            <label class="col">
-              Comments
-            </label>
-            <div class="col">
-              {{ object.others }}
-            </div>
-          </div>
           <div class="form-group border-bottom row">
             <label class="col">
               Dept
             </label>
             <div class="col">
-              {{ object.student.dept.name}}
+              {{object.student.course.dept_name}}
             </div>
           </div>
           <div class="form-group border-bottom row">
@@ -97,7 +87,7 @@
 
       </div>
     </div>
-
+<!----
     <h4>Invoice/Payment History</h4>
     {% if payments %}
       <table class="table table-sm table-bordered table-hover">
@@ -107,6 +97,7 @@
             <th>Amount Payable</th>
             <th>Amount Paid</th>
             <th>balance</th>
+              <th>Term/Level</th>
           </tr>
         </thead>
         <tbody>
@@ -116,15 +107,15 @@
               <td>{{payment.total_amount_payable  | intcomma }}</td>
               <td>{{payment.total_amount_paid  | intcomma }}</td>
               <td>{{payment.balance  | intcomma }}</td>
+            <td>{{payment.term  | intcomma }} ,  {{payment.level_info  | intcomma }}</td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
+
+---->
     {% else %}
         <p>There are no payment history for {{object}}</p>
     {% endif %}
 
-
-
-
-{% endblock content %}
+{%endblock content %}

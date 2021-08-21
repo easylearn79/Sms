@@ -18,6 +18,10 @@ def error_404_view(request):
     return render(request, 'student_template/404.html')
 
 
+from django.shortcuts import render
+from django.core.files.storage import FileSystemStorage
+
+
 def student_home(request):
     receipts = Receipt.objects.filter()
     invoice = Invoice.objects.filter()
@@ -109,8 +113,8 @@ def student_view_profile(request):
     if request.method == 'POST':
         try:
             if form.is_valid():
-                first_name = form.cleaned_data.get('first_name')
-                last_name = form.cleaned_data.get('last_name')
+                surname = form.cleaned_data.get('surname')
+                firstname = form.cleaned_data.get('firstname')
                 password = form.cleaned_data.get('password') or None
                 address = form.cleaned_data.get('address')
                 gender = form.cleaned_data.get('gender')
@@ -123,8 +127,8 @@ def student_view_profile(request):
                     filename = fs.save(passport.name, passport)
                     passport_url = fs.url(filename)
                     admin.profile_pic = passport_url
-                admin.first_name = first_name
-                admin.last_name = last_name
+                admin.firstname = firstname
+                admin.surname = surname
                 admin.address = address
                 admin.gender = gender
                 admin.save()
@@ -149,6 +153,21 @@ def student_fcmtoken(request):
         return HttpResponse("True")
     except Exception as e:
         return HttpResponse("False")
+
+
+def student_teller(request):
+    student = get_object_or_404(Student, admin=request.user)
+    invoice = Invoice.objects.filter()
+    sessions = AcademicSession.objects.all()
+    context = {
+        'student': student,
+        'invoice': invoice,
+        'sessions': sessions,
+        'page_title': 'Confirm Payment'
+    }
+
+    return render(request, 'staff_template/invoice_list.html', context)
+
 
 
 class InvoiceDetailVie(DetailView):

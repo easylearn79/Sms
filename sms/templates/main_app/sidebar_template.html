@@ -13,7 +13,7 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{ request.user.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <a href="#" class="d-block">{{user}}</a>
@@ -250,10 +250,10 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{user.staff.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">{{ user}}</a>
+                <a href="#" class="d-block">{{user.staff.surname}}</a>
             </div>
         </div>
 
@@ -272,7 +272,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
+                <!---<li class="nav-item">
                     {% url 'staff_view_profile' as staff_view_profile %}
                     <a href="{{staff_view_profile}}" class="nav-link {% if staff_view_profile == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -281,7 +281,7 @@
 
                         </p>
                     </a>
-                </li>
+                </li>--->
                 <li class="nav-item">
                   <a href="{% url 'invoice-list' %}" class="nav-link">
                     <i class="nav-icon fas fa-money-bill-alt"></i>
@@ -314,10 +314,10 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{user.lecturer.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">{{ user}}</a>
+                <a href="#" class="d-block">{{user}}</a>
             </div>
         </div>
 
@@ -336,7 +336,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
+               <!--- <li class="nav-item">
                     {% url 'lecturer_view_profile' as lecturer_view_profile %}
                     <a href="{{lecturer_view_profile}}" class="nav-link {% if lecturer_view_profile == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -345,7 +345,7 @@
 
                         </p>
                     </a>
-                </li>
+                </li>-->
 
                 <li class="nav-item">
                     {% url 'lecturer_add_result' as lecturer_add_result %}
@@ -381,10 +381,11 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ request.user.profile_pic}}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{ user.student.profile_pic.url}}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
-                <a href="#" class="d-block">{{user}}</a>
+                <a href="#" class="d-block">{{user.student.surname}}, {{user.student.firstname}} <br>
+                    {{user.student.matric_no}}</a>
             </div>
         </div>
 

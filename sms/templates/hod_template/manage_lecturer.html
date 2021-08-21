@@ -23,27 +23,28 @@
                                     <th>Gender</th>
                                     <th>Course</th>
                                     <th>Avatar</th>
-                                    <th>Edit</th>
+                                    <!---<th>Edit</th>-->
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for lecturer in allLecturer %}
-                                <tr class='clickable-row'  data-href="{% url 'detail' lecturer.id %}" >
+                                <tr class='clickable-row'  data-href="{% url 'lecturer_detail' lecturer.id %}" >
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{lecturer.last_name}}, {{lecturer.first_name}}</td>
+                                    <td>{{lecturer.surname}}, {{lecturer.firstname}}</td>
                                     <td>{{lecturer.email}}</td>
                                     <td>{{lecturer.gender}}</td>
                                     <td>{{lecturer.lecturer.course.name}}</td>
                                     <td>
                                         {% if lecturer.profile_pic == ""  %}
-                                        No Image
+                                            <div class="logo"><img src="{{ lecturer.lecturer.profile_pic.url}}"  style="width: 134px; height:116px">
                                         {% else %}
-                                        <img class="img img-fluid mb-2" height="100" width="100"
-                                            src="{{lecturer.profile_pic}}" alt="">
+                                            <img class="img-responsive thumbnail" height="100" width="100"
+                                                src="{{lecturer.profile_pic.url}}"  alt="img">
                                         {% endif %}
                                     </td>
-                                    <td><a href="
-                                        {% url 'edit_lecturer' lecturer.lecturer.id %}" class="btn btn-primary">Edit</a></td>
+
+                                    <!---<td><a href="
+                                        {% url 'edit_lecturer' lecturer.id %}" class="btn btn-primary">Edit</a></td> ---->
                                 </tr>
                                 {% endfor %}
                             </tbody>

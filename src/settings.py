@@ -135,7 +135,6 @@ AUTHENTICATION_BACKENDS = ['sms.EmailBackend.EmailBackend']
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (os.path.join('static'), )
 if not DEBUG:
     AWS_ACCESS_KEY_ID = 'AKIAYBV3Z5VI4BPROK4Q'
     AWS_SECRET_ACCESS_KEY = '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'
@@ -152,7 +151,6 @@ if not DEBUG:
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
     STATIC_URL = '/static/'
-    STATICFILES_DIRS = (os.path.join('static'), )
 
 
     MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")

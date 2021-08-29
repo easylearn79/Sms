@@ -132,6 +132,7 @@ class Student(models.Model):
     profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics', null=True)
     level = models.ForeignKey(Level, on_delete=models.DO_NOTHING, null=True, blank=False)
     term = models.ForeignKey(AcademicTerm, on_delete=models.DO_NOTHING, null=True)
+    
 
     def __str__(self):
         return f'{self.surname} {self.firstname}'
@@ -140,7 +141,6 @@ class Student(models.Model):
 class StudentBulkUpload(models.Model):
     date_uploaded = models.DateTimeField(auto_now=True)
     csv_file = models.FileField(upload_to='corecode/bulkupload/')
-    objects = CustomUserManager()
 
 
 class InvoiceBulkUpload(models.Model):

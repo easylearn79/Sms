@@ -49,7 +49,7 @@
                             </thead>
                             <tbody>
                                 {% for student in students %}
-                                <tr class='clickable-row' data-href="{% url 'student-detail' student.student.id %}">
+                                <tr class='clickable-row' data-href="{% url 'student-detail' student.id %}">
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{ student.student.surname}},  {{student.student.other_name}}. {{student.student.firstname}}</td>
                                     <td>{{student.student.matric_no}}</td>
@@ -66,7 +66,7 @@
                                             </div>
                                         {% endif %}
                                     </td>
-                                    <td><a href="{% url 'edit_student' student.student.id %}" class="btn btn-primary">Edit</a>
+                                    <td><a href="{% url 'edit_student' student.id %}" class="btn btn-primary">Edit</a>
                                     </td>
                                 </tr>
                                 {% endfor %}

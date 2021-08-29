@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '+*08!l0tk#0b&ho=ybwtzx4g=(zw1f_)@l%+6(_p_ceig3@icz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', '127.0.0.1', 'ouireceipt.herokuapp.com']
 

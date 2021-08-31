@@ -118,7 +118,7 @@ class StudentForm(CustomUserForm):
         model = Student
         fields =['surname', 'firstname', 'other_name'] + \
                 CustomsUserForm.Meta.fields + \
-                ['profile_pic', 'course', 'session', 'level', 'term', 'matric_no']
+                ['profile_pic', 'course', 'session', 'level', 'semester', 'matric_no']
 
 
 class AdminForm(CustomUserForm):

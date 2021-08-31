@@ -65,7 +65,8 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!----
+                    <li class="nav-item">
                     {% url 'add_lecturer' as add_lecturer %}
                     <a href="{{add_lecturer}}" class="nav-link {% if add_lecturer == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -88,6 +89,10 @@
                         </p>
                     </a>
                 </li>
+                    
+                    
+                ---->
+                
                 <li class="nav-item">
                     {% url 'add_student' as add_student%}
                     <a href="{{add_student}}" class="nav-link  {% if add_student == request.path %} active {% endif %}">
@@ -173,7 +178,9 @@
                         </p>
                     </a>
                 </li>
-                <li class="nav-item">
+
+                <!------
+                    <li class="nav-item">
                     {% url 'add_subject' as add_subject %}
                     <a href="{{add_subject}}" class="nav-link  {% if add_subject == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
@@ -195,6 +202,10 @@
                         </p>
                     </a>
                 </li>
+                    
+                    
+                ------>
+                
                 <li class="nav-item">
                     {% url 'add_session' as add_session %}
                     <a href="{{add_session}}" class="nav-link  {% if add_session == request.path %} active {% endif %}">
@@ -222,7 +233,7 @@
                     <a href="{{add_term}}" class="nav-link  {% if add_term == request.path %} active {% endif %}">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
-                            Add Term
+                            Add Semester
                         </p>
                     </a>
                 </li>
@@ -233,7 +244,7 @@
                     class="nav-link  {% if edit_term == request.path or manage_term == request.path %} active {% endif %}">
                     <i class="nav-icon fas fa-th"></i>
                     <p>
-                        Manage Term
+                        Manage Semester
                     </p>
                 </a>
                 </li>

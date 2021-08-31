@@ -131,7 +131,7 @@ class Student(models.Model):
     session = models.ForeignKey(AcademicSession, on_delete=models.DO_NOTHING, null=True)
     profile_pic = models.ImageField(default='default.jpg', upload_to='media/profile_pics', null=True)
     level = models.ForeignKey(Level, on_delete=models.DO_NOTHING, null=True, blank=False)
-    term = models.ForeignKey(AcademicTerm, on_delete=models.DO_NOTHING, null=True)
+    semester = models.ForeignKey(AcademicTerm, on_delete=models.DO_NOTHING, null=True)
     
 
     def __str__(self):
@@ -151,7 +151,7 @@ class InvoiceBulkUpload(models.Model):
 class Invoice(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     session = models.ForeignKey(AcademicSession, on_delete=models.CASCADE)
-    term = models.ForeignKey(AcademicTerm, on_delete=models.CASCADE)
+    semester = models.ForeignKey(AcademicTerm, on_delete=models.CASCADE)
     dept_info = models.ForeignKey(Course, on_delete=models.CASCADE)
     level_info = models.ForeignKey(Level, on_delete=models.CASCADE)
     balance_from_previous_term = models.IntegerField(default=0)
@@ -161,7 +161,7 @@ class Invoice(models.Model):
         'active', 'Active'), ('closed', 'Closed')], default='active')
 
     class Meta:
-        ordering = ['student', 'term', 'level_info']
+        ordering = ['student', 'semester', 'level_info']
 
     def __str__(self):
         return f'{self.student}'

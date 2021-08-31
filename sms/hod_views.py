@@ -198,7 +198,7 @@ def manage_session(request):
 
 def manage_term(request):
     terms = AcademicTerm.objects.all()
-    context = {'terms': terms, 'page_title': 'Manage Term'}
+    context = {'terms': terms, 'page_title': 'Manage Semester'}
     return render(request, "hod_template/manage_term.html", context)
 
 
@@ -320,7 +320,7 @@ def add_student(request):
             phone_no = forms.cleaned_data.get('phone_no')
             course = forms.cleaned_data.get('course')
             session = forms.cleaned_data.get('session')
-            term = forms.cleaned_data.get('term')
+            semester = forms.cleaned_data.get('semester')
             level = forms.cleaned_data.get('level')
             profile_pic = request.FILES.get('profile_pic')
             try:
@@ -337,7 +337,7 @@ def add_student(request):
                 user.student.other_name = other_name
                 user.student.matric_no = matric_no
                 user.student.level = level
-                user.student.term = term
+                user.student.semester = semester
                 user.level = level
                 user.save()
                 messages.success(request, "Successfully Added")
@@ -715,7 +715,7 @@ def add_session(request):
 
 def add_term(request):
     form = AcademicTermForm(request.POST or None)
-    context = {'form': form, 'page_title': 'Add Term'}
+    context = {'form': form, 'page_title': 'Add Semester'}
     if request.method == 'POST':
         if form.is_valid():
             try:
